@@ -110,40 +110,46 @@ router.post('/createTask', async (req, res, next) => {
   const database = client.db('COP4331');
   const usersCollection = database.collection('Users');
   const tasksCollection = database.collection('Tasks');
-  
-  const id = new ObjectId();
-  await tasksCollection.insertOne({
-    _id: id,
-    Name: req.body.firstname,
-    DueDate: req.body.date,
-    Ingredient: req.body.ingredient
-  })
-  res.json({
-      msg: "Task created"
-  });
 
-  //Take in the user ID from the request (assuming you have it in req.body.userId)
-  const userId = req.body.username;
+  try {
+    const id = new ObjectId();
+    await tasksCollection.insertOne({
+      _id: id,
+      Name: req.body.firstname,
+      Ingredient: req.body.ingredient
+    });
 
-  // Find the user document by their unique identifier (e.g., userId)
-  const username = await collection.findOne({ Username: req.body.username });
+    // Take in the user ID from the request (assuming you have it in req.body.userId)
+    const username = req.body.username;
 
-  if (!username) {
-    res.status(404).json({ msg: "User not found" });
-    return;
+    // Find the user document by their unique identifier (e.g., username)
+    const user = await usersCollection.findOne({ Username: username });
+
+    if (!user) {
+      res.status(404).json({ msg: "User not found" });
+      return;
+    }
+
+    if (!user.Tasks) {
+      // If 'Tasks' array doesn't exist, create it and initialize it with an array containing the new task ID
+      user.Tasks = [id];
+    } else {
+      // If 'Tasks' array already exists, append the new task ID to it
+      user.Tasks.push(id);
+    }
+
+    // Update the user document with the new 'Tasks' array
+    await usersCollection.updateOne({ Username: username }, { $set: { Tasks: user.Tasks } });
+
+    res.json({
+      msg: "Task created and added to the user's Tasks"
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  } finally {
+    await client.close();
   }
-
-  // Append the task ID to the user's 'Tasks' array
-  username.Tasks.push(id);
-
-  // Update the user document with the new 'Tasks' array
-  await usersCollection.updateOne({ _id: username }, { $set: { Tasks: username.Tasks } });
-
-  res.json({
-    msg: "Task created and added to the user's Tasks"
-  });
-
-  await client.close();
 });
 
 // Add CORS middleware to allow requests from any origin (you can configure this to be more restrictive)
