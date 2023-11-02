@@ -182,7 +182,34 @@ router.delete('/deleteTask/:taskId', async (req, res, next) => {
   } finally {
     await client.close();
   }
+}); //STILL NEEDS TO BE TESTED
+
+router.get('/getIngredientNames', async (req, res, next) => {
+  const client = await MongoClient.connect("mongodb+srv://APAccsess:mNGPig7mXsjIA7aT@cluster0.edvguvx.mongodb.net/");
+  const database = client.db('COP4331');
+  const ingredientCollection = database.collection('Ingredient');
+
+  try {
+    // Find all documents in the 'Ingredient' collection and project only the 'Name' field
+    const ingredients = await ingredientCollection.find({}, { projection: { _id: 0, Name: 1 } }).toArray();
+
+    if (ingredients.length === 0) {
+      res.status(404).json({ msg: "No ingredients found" });
+      return;
+    }
+
+    // Extract the 'Name' field from each ingredient and create an array of ingredient names
+    const ingredientNames = ingredients.map(ingredient => ingredient.Name);
+
+    res.json(ingredientNames);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  } finally {
+    await client.close();
+  }
 });
+
 
 // Add CORS middleware to allow requests from any origin (you can configure this to be more restrictive)
 router.use(cors());
