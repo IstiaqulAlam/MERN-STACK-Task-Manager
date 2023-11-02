@@ -104,6 +104,48 @@ router.put('/updateLastLoggedIn', async (req, res, next) => {
   await client.close();
 });
 
+//endpoint for creating a task
+router.post('/createTask', async (req, res, next) => {
+  const client = await MongoClient.connect("mongodb+srv://APAccsess:mNGPig7mXsjIA7aT@cluster0.edvguvx.mongodb.net/");
+  const database = client.db('COP4331');
+  const usersCollection = database.collection('Users');
+  const tasksCollection = database.collection('Tasks');
+  
+  const id = new ObjectId();
+  await collection.insertOne({
+    _id: id,
+    Name: req.body.firstname,
+    DueDate: req.body.date,
+    Ingredient: req.body.ingredient
+  })
+  res.json({
+      msg: "Task created"
+  });
+
+  //Take in the user ID from the request (assuming you have it in req.body.userId)
+  const userId = req.body.userId;
+
+  // Find the user document by their unique identifier (e.g., userId)
+  const user = await usersCollection.findOne({ _id: userId });
+
+  if (!user) {
+    res.status(404).json({ msg: "User not found" });
+    return;
+  }
+
+  // Append the task ID to the user's 'Tasks' array
+  user.Tasks.push(id);
+
+  // Update the user document with the new 'Tasks' array
+  await usersCollection.updateOne({ _id: userId }, { $set: { Tasks: user.Tasks } });
+
+  res.json({
+    msg: "Task created and added to the user's Tasks"
+  });
+
+  await client.close();
+});
+
 // Add CORS middleware to allow requests from any origin (you can configure this to be more restrictive)
 router.use(cors());
 
