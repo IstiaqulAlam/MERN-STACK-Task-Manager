@@ -1,4 +1,4 @@
-function Register() {
+const Register = async () => {
   const firstname = document.getElementById("firstname").value;
   const lastname = document.getElementById("lastname").value;
   const email = document.getElementById("email").value;
@@ -27,7 +27,7 @@ function Register() {
       //If any field is empty
       if (firstname === "" || lastname === "" || email === "" || username === "" || password === "") {
         // Check if any of the required fields are empty
-        console.log("Register Failed");
+        return "Register Failed"
       } 
       //Proceed with registration check
       else {
@@ -40,16 +40,16 @@ function Register() {
             console.log(JSON.stringify(jsonObject));
           }
         } else {
-          console.log("Failed to register");
+          return "Failed to register";
         }
       }
       
     } catch (err) {
-      console.log(err);
+      return err;
     }
   };
 
-  doRegister();
+  return await doRegister();
 }
 
 export { Register };

@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './styles2.css';
 import { Link } from 'react-router-dom';
 import { Register } from './RegisterScript';
 
 function RegisterMERT() {
+
+  const [loginNotice, setLoginNotice] = useState("");
+
     return (
       <>
         <h1>LifeQuests</h1>
@@ -23,7 +26,7 @@ function RegisterMERT() {
               <input className="rounded-pill p-2 mb-4" id="retypePassword" type="password" placeholder="Retype Password" required />
               <label className="h5" htmlFor="email">Email:</label>
               <input className="rounded-pill p-2 mb-4" id="email" type="email" placeholder="Email" required />
-              <button type="button" onClick={Register} id="registerButton">Register</button>
+              <button type="button" onClick={async () => setLoginNotice(await Register())} id="registerButton">Register</button>
               <Link to="/login" id="loginRedirectButton">Login</Link>
             </form>
             <div id="loginNotice"></div>

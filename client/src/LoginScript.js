@@ -1,4 +1,4 @@
-function Login() {
+const Login = async () => {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
 
@@ -20,15 +20,16 @@ function Login() {
         const user = JSON.stringify(jsonObject);
 
         if (user === "{\"msg\":[]}") {
-           console.log("Log in failed");
+          return "Failed to login";
         } else {
           // Update DateLastLoggedIn here
           updateLastLoggedIn(username);
           console.log(JSON.stringify(jsonObject));
+          return "Logged in";
         }
       }
     } catch (err) {
-      console.log(err);
+      return err;
     }
   };
 
@@ -46,7 +47,7 @@ function Login() {
     }
   };
 
-  doLogin();
+  return await doLogin();
 }
 
 export { Login };
