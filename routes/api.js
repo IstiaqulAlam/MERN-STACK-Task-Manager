@@ -134,7 +134,7 @@ router.post('/createTask', async (req, res, next) => {
       // If 'Tasks' array doesn't exist, create it and initialize it with an array containing the new task ID
       user.Tasks = [id];
     } else {
-      // If 'Tasks' array already exists, append the new task ID to it
+      // If 'Tasks' array already exists, append the new task ID
       user.Tasks.push(id);
     }
 
