@@ -210,6 +210,38 @@ router.get('/getIngredientNames', async (req, res, next) => {
   }
 });
 
+router.get('/getUserRecipes/:username', async (req, res, next) => {
+  const username = req.params.username; // Extract the username from the request parameters
+
+  const client = await MongoClient.connect("mongodb+srv://APAccsess:mNGPig7mXsjIA7aT@cluster0.edvguvx.mongodb.net/");
+  const database = client.db('COP4331');
+  const usersCollection = database.collection('Users');
+
+  try {
+    // Find the user document by their username
+    const user = await usersCollection.findOne({ Username: username });
+
+    if (!user) {
+      res.status(404).json({ msg: "User not found" });
+      return;
+    }
+
+    if (!user.Recipes) {
+      res.status(404).json({ msg: "User has no recipes" });
+      return;
+    }
+
+    // Extract the 'Recipes' array from the user document
+    const userRecipes = user.Recipes;
+
+    res.json(userRecipes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+});
 
 // Add CORS middleware to allow requests from any origin (you can configure this to be more restrictive)
 router.use(cors());
