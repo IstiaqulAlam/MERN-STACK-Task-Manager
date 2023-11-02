@@ -152,6 +152,38 @@ router.post('/createTask', async (req, res, next) => {
   }
 });
 
+router.delete('/deleteTask/:taskId', async (req, res, next) => {
+  const taskId = req.params.taskId; // Extract the task ID from the request parameters
+
+  const client = await MongoClient.connect("mongodb+srv://APAccsess:mNGPig7mXsjIA7aT@cluster0.edvguvx.mongodb.net/");
+  const database = client.db('COP4331');
+  const usersCollection = database.collection('Users');
+  const tasksCollection = database.collection('Tasks');
+
+  try {
+    // Find the task document by its ID and delete it from the 'Tasks' collection
+    const deletedTask = await tasksCollection.findOneAndDelete({ _id: new ObjectId(taskId) });
+
+    if (!deletedTask.value) {
+      res.status(404).json({ msg: "Task not found" });
+      return;
+    }
+
+    // Remove the task ID from the user's 'Tasks' array
+    const username = deletedTask.value.Username; // Assuming the task document has a 'Username' field
+    await usersCollection.updateOne({ Username: username }, { $pull: { Tasks: new ObjectId(taskId) }});
+
+    res.json({
+      msg: "Task deleted and removed from the user's Tasks"
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+});
+
 // Add CORS middleware to allow requests from any origin (you can configure this to be more restrictive)
 router.use(cors());
 
