@@ -112,7 +112,7 @@ router.post('/createTask', async (req, res, next) => {
   const tasksCollection = database.collection('Tasks');
   
   const id = new ObjectId();
-  await collection.insertOne({
+  await tasksCollection.insertOne({
     _id: id,
     Name: req.body.firstname,
     DueDate: req.body.date,
@@ -123,21 +123,21 @@ router.post('/createTask', async (req, res, next) => {
   });
 
   //Take in the user ID from the request (assuming you have it in req.body.userId)
-  const userId = req.body.userId;
+  const userId = req.body.username;
 
   // Find the user document by their unique identifier (e.g., userId)
-  const user = await usersCollection.findOne({ _id: userId });
+  const username = await collection.findOne({ Username: req.body.username });
 
-  if (!user) {
+  if (!username) {
     res.status(404).json({ msg: "User not found" });
     return;
   }
 
   // Append the task ID to the user's 'Tasks' array
-  user.Tasks.push(id);
+  username.Tasks.push(id);
 
   // Update the user document with the new 'Tasks' array
-  await usersCollection.updateOne({ _id: userId }, { $set: { Tasks: user.Tasks } });
+  await usersCollection.updateOne({ _id: username }, { $set: { Tasks: username.Tasks } });
 
   res.json({
     msg: "Task created and added to the user's Tasks"
