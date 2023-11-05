@@ -116,7 +116,8 @@ router.post('/createTask', async (req, res, next) => {
     const id = new ObjectId();
     await tasksCollection.insertOne({
       _id: id,
-      Name: req.body.firstname,
+      User: req.body.username,
+      Desc: req.body.desc,
       Ingredient: req.body.ingredient
     });
 
@@ -153,7 +154,8 @@ router.post('/createTask', async (req, res, next) => {
   }
 });
 
-router.delete('/deleteTask/:taskId', async (req, res, next) => {
+router.delete('/deleteTask/:username/:taskId', async (req, res, next) => {
+  const username = req.params.username; // Extract the user ID from the request parameters
   const taskId = req.params.taskId; // Extract the task ID from the request parameters
 
   const client = await MongoClient.connect(process.env.DB);
@@ -162,28 +164,47 @@ router.delete('/deleteTask/:taskId', async (req, res, next) => {
   const tasksCollection = database.collection('Tasks');
 
   try {
-    // Find the task document by its ID and delete it from the 'Tasks' collection
-    const deletedTask = await tasksCollection.findOneAndDelete({ _id: new ObjectId(taskId) });
+    // Find the user document by their unique identifier (e.g., userId)
+    const user = await usersCollection.findOne({ Username: username });
 
-    if (!deletedTask.value) {
-      res.status(404).json({ msg: "Task not found" });
+    if (!user) {
+      res.status(404).json({ msg: "User not found" });
+      return;
+    }
+
+    if (!user.Tasks || user.Tasks.length === 0) {
+      res.status(404).json({ msg: "User has no tasks" });
+      return;
+    }
+
+    // Convert taskId to ObjectId for comparison
+    const taskObjectId = new ObjectId(taskId);
+    
+    // Check if the task ID is in the user's 'Tasks' array
+    const taskIndex = user.Tasks.findIndex(task => task.equals(taskObjectId));
+
+    if (taskIndex === -1) {
+      res.status(404).json({ msg: "Task not found in the user's Tasks" });
       return;
     }
 
     // Remove the task ID from the user's 'Tasks' array
-    const username = deletedTask.value.Username; // Assuming the task document has a 'Username' field
-    await usersCollection.updateOne({ Username: username }, { $pull: { Tasks: new ObjectId(taskId) }});
+    user.Tasks.splice(taskIndex, 1);
 
-    res.json({
-      msg: "Task deleted and removed from the user's Tasks"
-    });
+    // Update the user document with the modified 'Tasks' array
+    await usersCollection.updateOne({ Username: username }, { $set: { Tasks: user.Tasks } });
+
+    // Find and delete the task document from the 'Tasks' collection
+    await tasksCollection.findOneAndDelete({ _id: taskObjectId });
+
+    res.json({ msg: "Task deleted from the user's Tasks and removed from the Tasks collection" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Internal server error" });
   } finally {
     await client.close();
   }
-}); //STILL NEEDS TO BE TESTED
+});
 
 router.get('/getIngredientNames', async (req, res, next) => {
   const client = await MongoClient.connect(process.env.DB);
