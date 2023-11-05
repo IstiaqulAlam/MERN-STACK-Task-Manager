@@ -206,6 +206,72 @@ router.delete('/deleteTask/:username/:taskId', async (req, res, next) => {
   }
 });
 
+router.delete('/finishTask/:username/:taskId', async (req, res, next) => {
+  const username = req.params.username; // Extract the user ID from the request parameters
+  const taskId = req.params.taskId; // Extract the task ID from the request parameters
+
+  const client = await MongoClient.connect(process.env.DB);
+  const database = client.db('COP4331');
+  const usersCollection = database.collection('Users');
+  const tasksCollection = database.collection('Tasks');
+  const basketCollection = database.collection('Baskets');
+
+  try {
+    // Find the user document by their unique identifier (e.g., username)
+    const user = await usersCollection.findOne({ Username: username });
+
+    if (!user) {
+      res.status(404).json({ msg: "User not found" });
+      return;
+    }
+
+    if (!user.Tasks || user.Tasks.length === 0) {
+      res.status(404).json({ msg: "User has no tasks" });
+      return;
+    }
+
+    // Convert taskId to ObjectId for comparison
+    const taskObjectId = new ObjectId(taskId);
+
+    // Check if the task ID is in the user's 'Tasks' array
+    const taskIndex = user.Tasks.findIndex(task => task.equals(taskObjectId));
+
+    if (taskIndex === -1) {
+      res.status(404).json({ msg: "Task not found in the user's Tasks" });
+      return;
+    }
+
+    // Find the task document to get the ingredient value
+    const task = await tasksCollection.findOne({ _id: taskObjectId });
+
+    if (!task) {
+      res.status(404).json({ msg: "Task document not found" });
+      return;
+    }
+
+    const ingredient = task.Ingredient; // Assuming the field is named 'Ingredient'
+
+    // Remove the task ID from the user's 'Tasks' array
+    user.Tasks.splice(taskIndex, 1);
+
+    // Update the user document with the modified 'Tasks' array
+    await usersCollection.updateOne({ Username: username }, { $set: { Tasks: user.Tasks } });
+
+    // Find and delete the task document from the 'Tasks' collection
+    await tasksCollection.findOneAndDelete({ _id: taskObjectId });
+
+    // Append the ingredient to the user's Basket collection
+    await basketCollection.updateOne({ User: username }, { $push: { Ingredients: ingredient } });
+
+    res.json({ msg: "Task deleted from the user's Tasks, removed from the Tasks collection, and ingredient added to the Basket" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+});
+
 router.get('/getIngredientNames', async (req, res, next) => {
   const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
