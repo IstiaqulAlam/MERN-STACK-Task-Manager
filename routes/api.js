@@ -4,6 +4,7 @@ const cors = require('cors');
 const Todo = require('../models/todo');
 const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
+require('dotenv').config()
 
 router.get('/get', (req, res, next) => {
   // This will return all the data, exposing only the id and action field to the client
@@ -31,7 +32,7 @@ router.delete('/delete/:id', (req, res, next) => {
 });
 
 router.post('/login', async (req, res, next) => {
-  const client = await MongoClient.connect("mongodb+srv://APAccsess:mNGPig7mXsjIA7aT@cluster0.edvguvx.mongodb.net/");
+  const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const collection = database.collection('Users');
   const users = await collection.find({ Username: req.body.username, Password: req.body.password}).toArray();
@@ -42,7 +43,7 @@ router.post('/login', async (req, res, next) => {
 });
 
 router.post('/register', async (req, res, next) => {
-  const client = await MongoClient.connect("mongodb+srv://APAccsess:mNGPig7mXsjIA7aT@cluster0.edvguvx.mongodb.net/");
+  const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const collection = database.collection('Users');
     // Check if the username or email already exists
@@ -86,7 +87,7 @@ router.post('/register', async (req, res, next) => {
 });
 
 router.put('/updateLastLoggedIn', async (req, res, next) => {
-  const client = await MongoClient.connect("mongodb+srv://APAccsess:mNGPig7mXsjIA7aT@cluster0.edvguvx.mongodb.net/");
+  const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const collection = database.collection('Users');
   const { username } = req.body;
@@ -106,7 +107,7 @@ router.put('/updateLastLoggedIn', async (req, res, next) => {
 
 //endpoint for creating a task
 router.post('/createTask', async (req, res, next) => {
-  const client = await MongoClient.connect("mongodb+srv://APAccsess:mNGPig7mXsjIA7aT@cluster0.edvguvx.mongodb.net/");
+  const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const usersCollection = database.collection('Users');
   const tasksCollection = database.collection('Tasks');
@@ -155,7 +156,7 @@ router.post('/createTask', async (req, res, next) => {
 router.delete('/deleteTask/:taskId', async (req, res, next) => {
   const taskId = req.params.taskId; // Extract the task ID from the request parameters
 
-  const client = await MongoClient.connect("mongodb+srv://APAccsess:mNGPig7mXsjIA7aT@cluster0.edvguvx.mongodb.net/");
+  const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const usersCollection = database.collection('Users');
   const tasksCollection = database.collection('Tasks');
@@ -185,7 +186,7 @@ router.delete('/deleteTask/:taskId', async (req, res, next) => {
 }); //STILL NEEDS TO BE TESTED
 
 router.get('/getIngredientNames', async (req, res, next) => {
-  const client = await MongoClient.connect("mongodb+srv://APAccsess:mNGPig7mXsjIA7aT@cluster0.edvguvx.mongodb.net/");
+  const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const ingredientCollection = database.collection('Ingredient');
 
@@ -213,7 +214,7 @@ router.get('/getIngredientNames', async (req, res, next) => {
 router.get('/getUserRecipes/:username', async (req, res, next) => {
   const username = req.params.username; // Extract the username from the request parameters
 
-  const client = await MongoClient.connect("mongodb+srv://APAccsess:mNGPig7mXsjIA7aT@cluster0.edvguvx.mongodb.net/");
+  const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const usersCollection = database.collection('Users');
 
