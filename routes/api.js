@@ -46,6 +46,7 @@ router.post('/register', async (req, res, next) => {
   const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const collection = database.collection('Users');
+  const basketsCollection = database.collection('Baskets');
     // Check if the username or email already exists
   const existingUserByUsername = await collection.findOne({ Username: req.body.username });
   const existingUserByEmail = await collection.findOne({ Email: req.body.email });
@@ -77,9 +78,18 @@ router.post('/register', async (req, res, next) => {
     DateCreated: date,
     DateLastLoggedIn: "",
     Email: req.body.email,
-    Ingredients: [],
-    Badges: []
+    Recipes: [],
+    Tasks: []
   })
+
+  const baskId = new ObjectId();
+  // Insert a new basket document in the 'Baskets' collection
+  await basketsCollection.insertOne({
+    _id: baskId,
+    User: req.body.username, // Assuming the 'User' field is related to the username
+    Ingredients: []
+  });
+
   res.json({
       msg: "User registered"
   });
