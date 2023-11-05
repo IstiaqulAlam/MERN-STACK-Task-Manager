@@ -11,10 +11,9 @@ function LoginMERT() {
     <>
       <h1>LifeQuests</h1>
       <div className="container">
-        <div className="content">
+        <div className="login-box">
           <div className="form-title">Login</div>
-          <form id="loginForm">
-            <label className="h5" htmlFor="username">Username:</label>
+          <form id="loginForm" className="login-form">
             <input className="rounded-pill p-2 mb-4" id="username" type="text" placeholder="Username" required />
             <label className="h5" htmlFor="password">Password:</label>
             <input className="rounded-pill p-2 mb-4" id="password" type="password" placeholder="Password" required />
@@ -34,4 +33,3 @@ function LoginMERT() {
 }
 
 export default LoginMERT;
-

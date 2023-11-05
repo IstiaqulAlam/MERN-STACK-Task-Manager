@@ -10,6 +10,13 @@ h1 {
     color: white; 
 }
 
+p {
+    margin: 0;
+    font-size: 1em;
+    color:black;
+    flex: 1;
+}
+
 .container {
     position: relative; 
     display: flex;
@@ -18,51 +25,107 @@ h1 {
     justify-content: center;
     height: 100vh;
     color: white;
-    z-index: 1; 
+    z-index: 1;
 }
 
-.content {
+.login-box {
     background-color: #ffffff;
     padding: 2em;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 50%; 
+    width: 25%;
     text-align: center;
-    height: 470px;
+    height: 33%;
+    position: relative;
+}
+
+.register-box {
+    background-color: #ffffff;
+    padding: 2em;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 25%;
+    text-align: center;
+    height: 61%;
+    position: relative;
+}
+
+.main-page-box {
+    background-color: #ffffff;
+    padding: 2em;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 75%;
+    text-align: center;
+    height: 80%;
     position: relative;
 }
 
 .form-title {
     font-size: 1.5em;
     color: #000102;
-    text-align: left;
-    margin-bottom: 1em;
-    position: absolute;
-    top: 20%; 
-    left: 70%;
-    transform: translate(-50%, -50%);
+    text-align: center;
     width: 100%;
 }
 
-form {
+.login-form {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; 
-    width: 100%; 
-    margin-top: 100px;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
 }
 
 input, button {
     margin: 0.5em 0;
     padding: 0.5em;
-    width: calc(50%); 
+    width: calc(100%);
     box-sizing: border-box;
     border: none; 
-    border-left: 2px solid #3498db; 
+    border-left: 2px solid #3498db;
 }
+
+.input_mainpage, .button_mainpage {
+    margin: 0.5em 0;
+    padding: 0.5em;
+    width: calc(20%);
+    box-sizing: border-box;
+    border: none;
+    border-left: 2px solid #3498db;
+}
+
 
 button {
     cursor: pointer;
+}
+
+.modalContainer {
+    display: grid;
+    align-items: center;
+    color: white;
+    z-index: 3;
+    word-wrap: break-word;
+    position:fixed;
+    top: 23%;
+    left: 25%;
+    width: 50%;
+}
+
+
+.modalBox {
+    background-color: #ffffff;
+    padding: 2em;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
 .mountain {
@@ -96,4 +159,17 @@ button {
     height: 150px;
     background-color: #f1c40f;
     border-radius: 50%;
+}
+
+#overlay {
+  position: fixed; /* Sit on top of the page content */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  cursor: pointer; /* Add a pointer on hover */
 }
