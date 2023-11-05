@@ -244,6 +244,51 @@ router.get('/getUserRecipes/:username', async (req, res, next) => {
   }
 });
 
+router.get('/getUserTasks/:username', async (req, res, next) => {
+  const username = req.params.username; // Extract the user ID from the request parameters
+  const client = await MongoClient.connect(process.env.DB);
+  const database = client.db('COP4331');
+  const usersCollection = database.collection('Users');
+  const tasksCollection = database.collection('Tasks');
+
+  try {
+    // Find the user document by their unique identifier (e.g., userId)
+    const user = await usersCollection.findOne({ Username: username });
+
+    if (!user) {
+      res.status(404).json({ msg: "User not found" });
+      return;
+    }
+
+    if (!user.Tasks || user.Tasks.length === 0) {
+      res.status(404).json({ msg: "User has no tasks" });
+      return;
+    }
+
+    // Initialize an array to store task information
+    const userTasksInfo = [];
+
+    // Iterate through the 'Tasks' array starting from the second index (index 1)
+    for (let i = 1; i < user.Tasks.length; i++) {
+      const taskId = user.Tasks[i]; // Get the task ID from the user's 'Tasks' array
+
+      // Find the task document by its ID
+      const task = await tasksCollection.findOne({ _id: taskId });
+
+      if (task) {
+        userTasksInfo.push(task);
+      }
+    }
+
+    res.json(userTasksInfo);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+});
+
 // Add CORS middleware to allow requests from any origin (you can configure this to be more restrictive)
 router.use(cors());
 
