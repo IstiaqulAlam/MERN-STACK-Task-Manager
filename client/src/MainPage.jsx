@@ -32,7 +32,7 @@ function MainPage() {
       <div className="container">
         <div className="main-page-box">
           <div className="form-title">Your tasks</div>
-          <form id="loginForm">
+          <form id="mainForm">
             <button type="button" className="button_mainpage" onClick={() => setShowModalTask(!showModalTask)} id="CreatTaskButton">Create Task</button>
             <button type="button" className="button_mainpage" onClick={() => navigate("/recipies")} id="ViewRecipiesButton">View Recipies</button>
             <button type="button" className="button_mainpage" onClick={() => setShowModalIngredients(!showModalIngredients)} id="YourIngredientsButton">Your Ingredients</button>
