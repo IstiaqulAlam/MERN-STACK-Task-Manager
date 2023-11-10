@@ -17,6 +17,26 @@ p {
     flex: 1;
 }
 
+th {
+    margin: 0;
+    font-size: 1em;
+    color:black;
+    flex: 1;
+}
+
+td {
+    margin: 0;
+    font-size: 1em;
+    color:black;
+    flex: 1;
+}
+
+table {
+    padding: 2em;
+    width: 100%;
+    position: relative;
+}
+
 .container {
     position: relative; 
     display: flex;
@@ -107,6 +127,15 @@ button {
     cursor: pointer;
 }
 
+dropdownItem {
+    margin: 0.5em 0;
+    padding: 0.5em;
+    width: calc(100%);
+    box-sizing: border-box;
+    border: none;
+    border-left: 2px solid #3498db;
+}
+
 .modalContainer {
     display: grid;
     align-items: center;
@@ -159,6 +188,26 @@ button {
     height: 150px;
     background-color: #f1c40f;
     border-radius: 50%;
+}
+
+.dropDownContainer {
+    display: grid;
+    align-items: center;
+    color: white;
+    z-index: 4;
+    word-wrap: break-word;
+    position:fixed;
+    top: 37%;
+    left: 26%;
+    width: 25%;
+}
+
+.dropDownbox {
+    background-color: #ffffff;
+    padding: 2em;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
 #overlay {
