@@ -3,9 +3,9 @@ const CreateDropDown = ({setIngredientHook}) => {
         <>
             <div className="dropDownContainer">
                 <div className="dropDownbox">
-                        <button type="button" onClick={() => setIngredientHook("Ingredeint 1")} id="ingredientButton1">Ingredeint 1</button>
-                        <button type="button" onClick={() => setIngredientHook("Ingredeint 2")} id="ingredientButton2">Ingredeint 2</button>
-                        <button type="button" onClick={() => setIngredientHook("Ingredeint 3")} id="ingredientButton3">Ingredient 3</button>
+                        <button type="button" onClick={() => setIngredientHook("Ingredient 1")} id="ingredientButton1">Ingredient 1</button>
+                        <button type="button" onClick={() => setIngredientHook("Ingredient 2")} id="ingredientButton2">Ingredient 2</button>
+                        <button type="button" onClick={() => setIngredientHook("Ingredient 3")} id="ingredientButton3">Ingredient 3</button>
                 </div>
             </div>
         </>

@@ -4,7 +4,7 @@ import { CreateDropDown } from './dropdown';
 const CreateTaskModal = () => {
 
     const [showDropdown, setShowDropdown] = useState(false);
-    const [pickedIngredient, setPickedIngredient] = useState("Pick an Ingredeint");
+    const [pickedIngredient, setPickedIngredient] = useState("Pick an Ingredient");
 
     return(
         <>

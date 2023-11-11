@@ -30,9 +30,9 @@ function Recipies() {
       <MDBTableHead>
         <tr>
           <th scope='col'>Recipie Name</th>
-          <th scope='col'>Ingredeint 1</th>
-          <th scope='col'>Ingredeint 2</th>
-          <th scope='col'>Ingredeint 3</th>
+          <th scope='col'>Ingredient 1</th>
+          <th scope='col'>Ingredient 2</th>
+          <th scope='col'>Ingredient 3</th>
           <th scope='col'>Times made</th>
         </tr>
       </MDBTableHead>
