@@ -25,7 +25,7 @@ const Login = async () => {
           // Update DateLastLoggedIn here
           updateLastLoggedIn(username);
           console.log(JSON.stringify(jsonObject));
-          return "Logged in";
+          return username;
         }
       }
     } catch (err) {

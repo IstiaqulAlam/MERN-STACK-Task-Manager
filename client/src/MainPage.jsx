@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import './styles.css';
 import { TaskList } from './MainPageScript';
 import { CreateTaskModal } from './CreateTaskModal';
@@ -11,10 +11,17 @@ function MainPage() {
   const [showModalTask, setShowModalTask] = useState(false);
   const [showModalIngredients, setShowModalIngredients] = useState(false);
 
-  const getTasks = async () => {setTasks(await TaskList())}
-  if (tasks === undefined)
-  {
-      getTasks();
+  const location = useLocation();
+  const user = location.state?.user;
+
+  const getTasks = async () => {
+    if (user) {
+      setTasks(await TaskList(user));
+    }
+  };
+  
+  if (tasks === undefined) {
+    getTasks();
   }
 
   const getIngredients = async () => {setIngredients(await YourIngredients())}
@@ -31,13 +38,14 @@ function MainPage() {
       <h1>LifeQuests</h1>
       <div className="container">
         <div className="main-page-box">
+          <div className="form-title">Welcome, {user}</div>
           <div className="form-title">Your tasks</div>
           <form id="mainForm">
             <button type="button" className="button_mainpage" onClick={() => setShowModalTask(!showModalTask)} id="CreatTaskButton">Create Task</button>
             <button type="button" className="button_mainpage" onClick={() => navigate("/recipies")} id="ViewRecipiesButton">View Recipies</button>
             <button type="button" className="button_mainpage" onClick={() => setShowModalIngredients(!showModalIngredients)} id="YourIngredientsButton">Your Ingredients</button>
             {tasks}
-            {showModalTask ? <CreateTaskModal/> : undefined}
+            {showModalTask ? <CreateTaskModal username={user} /> : undefined}
             {showModalTask ? <div id="overlay" onClick={() => setShowModalTask(false)}></div> : undefined}
             {showModalIngredients ? ingredients: undefined}
             {showModalIngredients ? <div id="overlay" onClick={() => setShowModalIngredients(false)}></div> : undefined}

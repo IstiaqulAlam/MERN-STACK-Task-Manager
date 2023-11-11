@@ -353,14 +353,14 @@ router.get('/getUserTasks/:username', async (req, res, next) => {
     const user = await usersCollection.findOne({ Username: username });
 
     if (!user) {
-      res.status(404).json({ msg: "User not found" });
+      res.status(404).json({ msg: `User ${username} not found` });
       return;
-    }
+  }
 
-    if (!user.Tasks || user.Tasks.length === 0) {
-      res.status(404).json({ msg: "User has no tasks" });
+  if (!user.Tasks || user.Tasks.length === 0) {
+      res.status(404).json({ msg: `User ${username} has no tasks` });
       return;
-    }
+  }
 
     // Initialize an array to store task information
     const userTasksInfo = [];
