@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { CreateDropDown } from './dropdown';
-import { getPickedIngredient, setPickedIngredient } from './dropdownScript';
 
 const CreateTaskModal = () => {
 
