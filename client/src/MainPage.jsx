@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import './styles.css';
 import { TaskList } from './MainPageScript';
@@ -16,7 +16,8 @@ function MainPage() {
 
   const getTasks = async () => {
     if (user) {
-      setTasks(await TaskList(user));
+      const taskData = await TaskList(user)
+      setTasks(taskData);
     }
   };
   
@@ -33,13 +34,6 @@ function MainPage() {
   {
     getIngredients();
   }
-
-  useEffect(() => {
-    // Fetch tasks again when the number of tasks changes
-    // This effect will run whenever the 'tasks' state variable changes
-    getTasks();
-    getIngredients();
-  }, [tasks, getTasks]); 
   
   const navigate = useNavigate();
 

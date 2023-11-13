@@ -49,6 +49,8 @@ const handleDelete = async (taskId, username) => {
         if (response.ok) {
           // If deletion is successful, update the tasks state
           console.log(`Deletion successful`);
+          window.location.reload(true);
+
         } else {
           console.error('Failed to delete task:', response.statusText);
         }
@@ -71,6 +73,7 @@ const handleFinish = async (taskId, username) => {
         if (response.ok) {
             // If deletion is successful, update the tasks state
             console.log(`Finish task successful`);
+            window.location.reload(true);
         } else {
             console.error('Failed to finish task:', response.statusText);
         }
