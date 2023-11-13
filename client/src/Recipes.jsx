@@ -5,7 +5,7 @@ import { YourIngredients } from './ViewIngredientsModal';
 import { MDBTable, MDBTableHead, MDBTableBody } from 'mdb-react-ui-kit';
 import { loginWithStoredCredentials } from './AutoLogin';
 
-function Recipies() {
+function Recipes() {
   const location = useLocation();
   const user = location.state?.user;
   const navigate = useNavigate();
@@ -28,7 +28,7 @@ function Recipies() {
       <h1>LifeQuests</h1>
       <div className="container">
         <div className="main-page-box">
-          <div className="form-title">Recipies</div>
+          <div className="form-title">Recipes</div>
           <button type="button" className="button_mainpage" onClick=
           {() => 
           navigate('/mainpage', { state: { user } })}
@@ -41,7 +41,7 @@ function Recipies() {
       <MDBTable>
       <MDBTableHead>
         <tr>
-          <th scope='col'>Recipie Name</th>
+          <th scope='col'>Recipe Name</th>
           <th scope='col'>Ingredient 1</th>
           <th scope='col'>Ingredient 2</th>
           <th scope='col'>Ingredient 3</th>
@@ -79,4 +79,4 @@ function Recipies() {
   );
 }
 
-export default Recipies;
+export default Recipes;

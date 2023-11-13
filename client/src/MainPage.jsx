@@ -48,7 +48,7 @@ function MainPage() {
           <div className="form-title">Your tasks</div>
           <form id="mainForm">
             <button type="button" className="button_mainpage" onClick={() => setShowModalTask(!showModalTask)} id="CreatTaskButton">Create Task</button>
-            <button type="button" className="button_mainpage" onClick={() => navigate('/recipies', { state: { user }})} id="ViewRecipiesButton">View Recipies</button>
+            <button type="button" className="button_mainpage" onClick={() => navigate('/recipes', { state: { user }})} id="ViewRecipesButton">View Recipes</button>
             <button type="button" className="button_mainpage" onClick={() => setShowModalIngredients(!showModalIngredients)} id="YourIngredientsButton">Your Ingredients</button>
             {tasks}
             {tasks && tasks.length === 0 && <p>No tasks available</p>}
