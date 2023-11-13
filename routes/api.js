@@ -282,6 +282,33 @@ router.delete('/finishTask/:username/:taskId', async (req, res, next) => {
   }
 });
 
+router.get('/getUserIngredients/:username', async (req, res, next) => {
+  const username = req.params.username; // Extract the user ID from the request parameters
+
+  const client = await MongoClient.connect(process.env.DB);
+  const database = client.db('COP4331');
+  const basketCollection = database.collection('Baskets');
+
+  try {
+    // Find the user's basket by their unique identifier (e.g., username)
+    const userBasket = await basketCollection.findOne({ User: username });
+
+    if (!userBasket) {
+      res.status(404).json({ msg: "User not found in the Basket collection" });
+      return;
+    }
+
+    const ingredients = userBasket.Ingredients || [];
+
+    res.json({ ingredients });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+});
+
 router.get('/getIngredientNames', async (req, res, next) => {
   const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');

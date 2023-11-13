@@ -24,15 +24,21 @@ function MainPage() {
     getTasks();
   }
 
-  const getIngredients = async () => {setIngredients(await YourIngredients())}
+  const getIngredients = async () => {
+    const ingredientsData = await YourIngredients(user);
+    setIngredients(ingredientsData);
+  };
+  
   if (ingredients === undefined)
   {
     getIngredients();
   }
+
   useEffect(() => {
     // Fetch tasks again when the number of tasks changes
     // This effect will run whenever the 'tasks' state variable changes
     getTasks();
+    getIngredients();
   }, [tasks, getTasks]); 
   
   const navigate = useNavigate();
