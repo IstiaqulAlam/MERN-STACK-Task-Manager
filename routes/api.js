@@ -259,7 +259,7 @@ router.delete('/finishTask/:username/:taskId', async (req, res, next) => {
       return;
     }
 
-    const ingredient = task.Ingredient; // Assuming the field is named 'Ingredient'
+    const ingredient = task.Ingredient;
 
     // Remove the task ID from the user's 'Tasks' array
     user.Tasks.splice(taskIndex, 1);

@@ -18,10 +18,11 @@ const TaskList = async (username) => {
                   <button
                     type="button"
                     className="delete-button"
-                    onClick={() => handleDelete(task._id, username)}
-                  >
-                    Delete
-                  </button>
+                    onClick={() => handleDelete(task._id, username)}>Delete</button>
+                  <button
+                    type="button"
+                    className="finish-button"
+                    onClick={() => handleFinish(task._id, username)}>Finish</button>
                 </div>
               ));
         } else {
@@ -54,6 +55,29 @@ const handleDelete = async (taskId, username) => {
       } catch (error) {
         console.error('Error deleting task:', error.message);
       }
-    };
+};
+
+const handleFinish = async (taskId, username) => {
+    console.log(`Finish task with ID ${taskId} for user ${username}`);
+    try {
+        // Make a DELETE request to delete the task
+        const response = await fetch(`http://67.205.172.88:5000/api/finishTask/${username}/${taskId}`, {
+            method: 'DELETE',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+        });
+    
+        if (response.ok) {
+            // If deletion is successful, update the tasks state
+            console.log(`Finish task successful`);
+        } else {
+            console.error('Failed to finish task:', response.statusText);
+        }
+        } catch (error) {
+        console.error('Error finishing task:', error.message);
+        }
+};
+    
 
 export { TaskList, handleDelete };

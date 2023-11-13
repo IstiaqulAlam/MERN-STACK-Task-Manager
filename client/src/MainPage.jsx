@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import './styles.css';
 import { TaskList } from './MainPageScript';
@@ -29,8 +29,12 @@ function MainPage() {
   {
     getIngredients();
   }
-
-  // Why the fuck do I have to do this react
+  useEffect(() => {
+    // Fetch tasks again when the number of tasks changes
+    // This effect will run whenever the 'tasks' state variable changes
+    getTasks();
+  }, [tasks, getTasks]); 
+  
   const navigate = useNavigate();
 
   return (
