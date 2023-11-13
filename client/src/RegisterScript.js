@@ -1,4 +1,4 @@
-import stringutils from 'stringutilsjs';
+import isAlpha from 'stringutilsjs';
 
 async function Register() {
   const firstname = document.getElementById("firstname").value;
@@ -15,7 +15,7 @@ async function Register() {
         // Check if any of the required fields are empty
         return "Fill out all fields";
       }
-      else if (password.length < 6 || stringutils.isAlpha(password)) {
+      else if (password.length < 6 || isAlpha(password)) {
         return "Password did not meet compelxity requirments";
       }
 
