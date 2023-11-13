@@ -1,16 +1,23 @@
 import React, { useState } from 'react';
 import './styles.css';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { YourIngredients } from './ViewIngredientsModal';
 import { MDBTable, MDBTableHead, MDBTableBody } from 'mdb-react-ui-kit';
+import { loginWithStoredCredentials } from './AutoLogin';
 
 function Recipies() {
+  const location = useLocation();
+  const user = location.state?.user;
   const navigate = useNavigate();
 
   const [ingredients, setIngredients] = useState();
   const [showModalIngredients, setShowModalIngredients] = useState(false);
 
-  const getIngredients = async () => {setIngredients(await YourIngredients())}
+  const getIngredients = async () => {
+    loginWithStoredCredentials();
+
+    setIngredients(await YourIngredients(user))
+  }
   if (ingredients === undefined)
   {
     getIngredients();
@@ -22,7 +29,12 @@ function Recipies() {
       <div className="container">
         <div className="main-page-box">
           <div className="form-title">Recipies</div>
-          <button type="button" className="button_mainpage" onClick={() => navigate("/mainpage")} id="ShowTasksBUtton">View Tasks</button>
+          <button type="button" className="button_mainpage" onClick=
+          {() => 
+          navigate('/mainpage', { state: { user } })}
+
+          
+          id="ShowTasksBUtton">View Tasks</button>
           <button type="button" className="button_mainpage" onClick={() => setShowModalIngredients(true)} id="YourIngredientsButton">Your Ingredients</button>
             {showModalIngredients ? ingredients: undefined}
             {showModalIngredients ? <div id="overlay" onClick={() => setShowModalIngredients(false)}></div> : undefined}

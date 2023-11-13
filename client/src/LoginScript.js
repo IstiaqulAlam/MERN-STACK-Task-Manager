@@ -23,6 +23,10 @@ const Login = async () => {
         } else {
           // Login worked
           updateLastLoggedIn(username);
+          
+          localStorage.setItem('username', username);
+          localStorage.setItem('password', password);
+
           console.log(JSON.stringify(jsonObject));
           return username;
         }
