@@ -4,7 +4,6 @@ const Login = async () => {
 
   const urlBase = 'http://67.205.172.88:5000';
 
-
   const doLogin = async () => {
     try {
       const response = await fetch(`${urlBase}/api/login`, {
@@ -22,7 +21,7 @@ const Login = async () => {
         if (user === "{\"msg\":[]}") {
           return "Failed to login";
         } else {
-          // Update DateLastLoggedIn here
+          // Login worked
           updateLastLoggedIn(username);
           console.log(JSON.stringify(jsonObject));
           return username;

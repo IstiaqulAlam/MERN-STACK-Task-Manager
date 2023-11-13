@@ -63,6 +63,7 @@ const CreateTaskModal = ({ username }) => {
             if (response.ok) {
                 // Task created successfully
                 console.log('Task created successfully');
+                window.location.reload(true);
                 // Add any additional logic you want to perform after successful task creation
             } else {
                 // Handle the case where the server returns an error

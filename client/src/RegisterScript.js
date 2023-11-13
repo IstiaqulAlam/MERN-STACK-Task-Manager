@@ -1,4 +1,6 @@
-function Register() {
+import stringutils from 'stringutilsjs';
+
+async function Register() {
   const firstname = document.getElementById("firstname").value;
   const lastname = document.getElementById("lastname").value;
   const email = document.getElementById("email").value;
@@ -8,6 +10,15 @@ function Register() {
   const urlBase = 'http://67.205.172.88:5000';
 
   const doRegister = async () => {
+
+    if (firstname === "" || lastname === "" || email === "" || username === "" || password === "") {
+        // Check if any of the required fields are empty
+        return "Fill out all fields";
+      }
+      else if (password.length < 6 || stringutils.isAlpha(password)) {
+        return "Password did not meet compelxity requirments";
+      }
+
     try {
 
       const response = await fetch(`${urlBase}/api/register`, {
@@ -25,31 +36,26 @@ function Register() {
       });
       
       //If any field is empty
-      if (firstname === "" || lastname === "" || email === "" || username === "" || password === "") {
-        // Check if any of the required fields are empty
-        console.log("Register Failed");
-      } 
       //Proceed with registration check
-      else {
-        if (response.ok) {
-          const jsonObject = await response.json();
-  
-          if (jsonObject.err) {
-            console.log(JSON.stringfy(jsonObject));
-          } else {
-            console.log(JSON.stringify(jsonObject));
-          }
+      if (response.ok) {
+        const jsonObject = await response.json();
+
+        if (jsonObject.err) {
+          console.log(JSON.stringfy(jsonObject));
         } else {
-          console.log("Failed to register");
+          console.log(JSON.stringify(jsonObject));
         }
+      } else {
+        return "Registeration Complete";
       }
       
     } catch (err) {
-      console.log(err);
+      return "Failed to register";
     }
+    return "Registeration Complete";
   };
 
-  doRegister();
+  return await doRegister();
 }
 
 export { Register };
