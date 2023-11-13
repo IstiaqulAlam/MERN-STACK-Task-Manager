@@ -11,7 +11,10 @@ function LoginMERT() {
   const handleLogin = async () => {
     const user = await Login();
     console.log('Login result:', user);
-    if (user) {
+    if (user === "Failed to login") {
+      setLoginNotice('Login failed. Please check your credentials.');
+    }
+    else if (user) {
       setLoginNotice(`Logged in as ${user.username}`);
       // Redirect to the main page with user information
       navigate('/mainpage', { state: { user } });
