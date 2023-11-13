@@ -45,6 +45,7 @@ function MainPage() {
             <button type="button" className="button_mainpage" onClick={() => navigate("/recipies")} id="ViewRecipiesButton">View Recipies</button>
             <button type="button" className="button_mainpage" onClick={() => setShowModalIngredients(!showModalIngredients)} id="YourIngredientsButton">Your Ingredients</button>
             {tasks}
+            {tasks && tasks.length === 0 && <p>No tasks available</p>}
             {showModalTask ? <CreateTaskModal username={user} /> : undefined}
             {showModalTask ? <div id="overlay" onClick={() => setShowModalTask(false)}></div> : undefined}
             {showModalIngredients ? ingredients: undefined}

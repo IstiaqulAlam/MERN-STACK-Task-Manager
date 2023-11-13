@@ -14,9 +14,16 @@ const TaskList = async (username) => {
             // tasks is an array of task objects, you can map over them to create JSX elements
             return tasks.map(task => (
                 <div key={task._id}>
-                    <p>{`Task: ${task.Desc}, Ingredient: ${task.Ingredient}`}</p>
+                  <p>{`Task: ${task.Desc}, Ingredient: ${task.Ingredient}`}</p>
+                  <button
+                    type="button"
+                    className="delete-button"
+                    onClick={() => handleDelete(task._id, username)}
+                  >
+                    Delete
+                  </button>
                 </div>
-            ));
+              ));
         } else {
             console.error('Failed to fetch tasks:', response.statusText);
             return <p>Failed to fetch tasks</p>;
@@ -27,4 +34,26 @@ const TaskList = async (username) => {
     }
 };
 
-export { TaskList };
+const handleDelete = async (taskId, username) => {
+    console.log(`Delete task with ID ${taskId} for user ${username}`);
+    try {
+        // Make a DELETE request to delete the task
+        const response = await fetch(`http://67.205.172.88:5000/api/deleteTask/${username}/${taskId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        if (response.ok) {
+          // If deletion is successful, update the tasks state
+          console.log(`Deletion successful`);
+        } else {
+          console.error('Failed to delete task:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error deleting task:', error.message);
+      }
+    };
+
+export { TaskList, handleDelete };
