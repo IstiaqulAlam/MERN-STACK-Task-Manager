@@ -413,6 +413,127 @@ router.get('/getUserTasks/:username', async (req, res, next) => {
   }
 });
 
+router.post('/redeemRecipe/:username/:recipeName', async (req, res, next) => {
+  const username = req.params.username; // Extract the user ID from the request parameters
+  const recipeName = req.params.recipeName; // Extract the recipe name from the request parameters
+
+  const client = await MongoClient.connect(process.env.DB);
+  const database = client.db('COP4331');
+  const recipesCollection = database.collection('Recipes');
+  const basketsCollection = database.collection('Baskets');
+  const usersCollection = database.collection('Users');
+
+  try {
+    // Find the recipe document by its name
+    const recipe = await recipesCollection.findOne({ Name: recipeName });
+
+    if (!recipe) {
+      res.status(404).json({ msg: "Recipe not found" });
+      return;
+    }
+
+    // Get the ingredients required for the recipe
+    const recipeIngredients = recipe.Ingredients;
+
+    // Find the user's basket document by their username
+    const userBasket = await basketsCollection.findOne({ User: username });
+
+    if (!userBasket) {
+      res.status(404).json({ msg: "User's basket not found" });
+      return;
+    }
+
+    // Get the ingredients in the user's basket
+    const userBasketIngredients = userBasket.Ingredients;
+
+    // Check if the user has sufficient ingredients for the recipe
+    const hasSufficientIngredients = recipeIngredients.every(ingredient => userBasketIngredients.includes(ingredient));
+
+    if (!hasSufficientIngredients) {
+      res.json({ msg: "Insufficient ingredients" });
+      return;
+    }
+
+    // Remove the used ingredients from the user's basket
+    const updatedBasketIngredients = userBasketIngredients.filter(ingredient => !recipeIngredients.includes(ingredient));
+
+    // Update the user's basket document with the modified 'Ingredients' array
+    await basketsCollection.updateOne({ User: username }, { $set: { Ingredients: updatedBasketIngredients } });
+
+    // Access the user document based on the username and append the recipe name to their 'Recipes' array
+    await usersCollection.updateOne({ Username: username }, { $push: { Recipes: recipeName } });
+
+    res.json({ msg: "Recipe redeemed successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+});
+
+router.get('/getRecipeIngredients/:recipeName', async (req, res, next) => {
+  const recipeName = req.params.recipeName; // Extract the recipe name from the request parameters
+
+  const client = await MongoClient.connect(process.env.DB);
+  const database = client.db('COP4331');
+  const recipesCollection = database.collection('Recipes');
+
+  try {
+    // Find the recipe document by its name
+    const recipe = await recipesCollection.findOne({ Name: recipeName });
+
+    if (!recipe) {
+      res.status(404).json({ msg: "Recipe not found" });
+      return;
+    }
+
+    // Return the ingredients of the recipe
+    res.json(recipe.Ingredients);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+});
+
+router.put('/editTask/:taskId', async (req, res, next) => {
+  const taskId = req.params.taskId; // Extract the task ID from the request parameters
+
+  const client = await MongoClient.connect(process.env.DB);
+  const database = client.db('COP4331');
+  const tasksCollection = database.collection('Tasks');
+
+  try {
+    // Find the task document by its ID
+    const existingTask = await tasksCollection.findOne({ _id: new ObjectId(taskId) });
+
+    if (!existingTask) {
+      res.status(404).json({ msg: "Task not found" });
+      return;
+    }
+
+    // Update the task document with the new values
+    await tasksCollection.updateOne(
+      { _id: new ObjectId(taskId) },
+      {
+        $set: {
+          Desc: req.body.desc || existingTask.Desc, // Update only if new desc is provided
+          Ingredient: req.body.ingredient || existingTask.Ingredient // Update only if new ingredient is provided
+        }
+      }
+    );
+
+    res.json({ msg: "Task edited successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+});
+
 // Add CORS middleware to allow requests from any origin (you can configure this to be more restrictive)
 router.use(cors());
 
