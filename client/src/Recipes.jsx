@@ -13,6 +13,10 @@ function Recipes() {
   const [ingredients, setIngredients] = useState();
   const [showModalIngredients, setShowModalIngredients] = useState(false);
 
+  const [LasagnaTimesMade, SetLasagnaTimesMade] = useState(0);
+  const [ApplePieTimesMade, SetApplePieTimesMade] = useState(0);
+  const [PizzaTimesMade, SetPizzaTimesMade] = useState(0);
+
   const getIngredients = async () => {
     loginWithStoredCredentials();
 
@@ -46,6 +50,7 @@ function Recipes() {
           <th scope='col'>Ingredient 2</th>
           <th scope='col'>Ingredient 3</th>
           <th scope='col'>Times made</th>
+          <th scope='col'>Redeem</th>
         </tr>
       </MDBTableHead>
       <MDBTableBody>
@@ -54,18 +59,24 @@ function Recipes() {
           <td>Pasta</td>
           <td>Sauce</td>
           <td>Cheese</td>
+          <td>{LasagnaTimesMade}</td>
+          <td><button type="button" onClick={undefined} id="RedeemButton1">Redeem</button></td>
         </tr>
         <tr>
           <td>Apple Pie</td>
           <td>Puff Pastry</td>
           <td>Apples</td>
           <td>Sugar</td>
+          <td>{ApplePieTimesMade}</td>
+          <td><button type="button" onClick={undefined} id="RedeemButton2">Redeem</button></td>
         </tr>
         <tr>
           <td>Pizza</td>
           <td>Cheese</td>
           <td>Dough</td>
           <td>Tomato Sauce</td>
+          <td>{PizzaTimesMade}</td>
+          <td><button type="button" onClick={undefined} id="RedeemButton3">Redeem</button></td>
         </tr>
       </MDBTableBody>
     </MDBTable>
