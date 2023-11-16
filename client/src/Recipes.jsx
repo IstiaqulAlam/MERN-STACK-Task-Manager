@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './styles.css';
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from 'react-router-dom';
 import { YourIngredients } from './ViewIngredientsModal';
 import { MDBTable, MDBTableHead, MDBTableBody } from 'mdb-react-ui-kit';
 import { loginWithStoredCredentials } from './AutoLogin';
@@ -12,18 +12,46 @@ function Recipes() {
 
   const [ingredients, setIngredients] = useState();
   const [showModalIngredients, setShowModalIngredients] = useState(false);
-
-  const [LasagnaTimesMade, SetLasagnaTimesMade] = useState(0);
-  const [ApplePieTimesMade, SetApplePieTimesMade] = useState(0);
-  const [PizzaTimesMade, SetPizzaTimesMade] = useState(0);
+  const [userRecipes, setUserRecipes] = useState([]);
 
   const getIngredients = async () => {
     loginWithStoredCredentials();
+    setIngredients(await YourIngredients(user));
+  };
+  const getUserRecipes = async () => {
+    try {
+      const response = await fetch(`http://67.205.172.88:5000/api/getUserRecipes/${user}`);
 
-    setIngredients(await YourIngredients(user))
-  }
-  if (ingredients === undefined)
-  {
+      if (response.ok) {
+        const recipes = await response.json();
+        setUserRecipes(recipes);
+      } else {
+        console.error('Failed to fetch user recipes:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching user recipes:', error);
+    }
+  };
+  getUserRecipes();
+
+  const redeemRecipe = async (recipeName) => {
+    try {
+      const response = await fetch(`http://67.205.172.88:5000/api/redeemRecipe/${user}/${recipeName}`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        console.log(`Recipe ${recipeName} redeemed successfully!`);
+      } else {
+        console.error('Failed to redeem recipe:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Error redeeming recipe:', error);
+    }
+  };
+
+  // Fetch ingredients when the component mounts
+  if (ingredients === undefined) {
     getIngredients();
   }
 
@@ -59,24 +87,36 @@ function Recipes() {
           <td>Pasta</td>
           <td>Sauce</td>
           <td>Cheese</td>
-          <td>{LasagnaTimesMade}</td>
-          <td><button type="button" onClick={undefined} id="RedeemButton1">Redeem</button></td>
+          <td>{userRecipes.filter(recipe => recipe === 'Lasagna').length}</td>
+          <td>
+            <button type="button" onClick={() => redeemRecipe('Lasagna')} id="RedeemButton1">
+              Redeem
+            </button>
+          </td>
         </tr>
         <tr>
           <td>Apple Pie</td>
           <td>Puff Pastry</td>
           <td>Apples</td>
           <td>Sugar</td>
-          <td>{ApplePieTimesMade}</td>
-          <td><button type="button" onClick={undefined} id="RedeemButton2">Redeem</button></td>
+          <td>{userRecipes.filter(recipe => recipe === 'Apple Pie').length}</td>
+          <td>
+            <button type="button" onClick={() => redeemRecipe('Apple Pie')} id="RedeemButton2">
+              Redeem
+            </button>
+          </td>
         </tr>
         <tr>
           <td>Pizza</td>
           <td>Cheese</td>
           <td>Dough</td>
           <td>Tomato Sauce</td>
-          <td>{PizzaTimesMade}</td>
-          <td><button type="button" onClick={undefined} id="RedeemButton3">Redeem</button></td>
+          <td>{userRecipes.filter(recipe => recipe === 'Pizza').length}</td>
+          <td>
+            <button type="button" onClick={() => redeemRecipe('Pizza')} id="RedeemButton3">
+              Redeem
+            </button>
+          </td>
         </tr>
       </MDBTableBody>
     </MDBTable>

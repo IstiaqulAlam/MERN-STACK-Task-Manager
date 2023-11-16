@@ -9,6 +9,24 @@ const CreateTaskModal = ({ username }) => {
     const [pickedIngredient, setPickedIngredient] = useState("Pick an Ingredient");
     const [taskName, setTaskName] = useState("");
     const [loggedIn, setLoggedIn] = useState(false);
+    const [ingredientNames, setIngredientNames] = useState([]);
+
+    const fetchIngredientNames = async () => {
+        try {
+            const response = await fetch(`${urlBase}/api/getIngredientNames`);
+            if (response.ok) {
+                const data = await response.json();
+                setIngredientNames(data);
+            } else {
+                console.error('Failed to fetch ingredient names:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error fetching ingredient names:', error.message);
+        }
+    };
+
+    // Fetch ingredient names when the component is first rendered
+    fetchIngredientNames();
 
     const handleIngredientSelection = (ingredient) => {
         setPickedIngredient(ingredient);
@@ -59,12 +77,9 @@ const CreateTaskModal = ({ username }) => {
                     ingredient: pickedIngredient,
                 }),
             });
-
             if (response.ok) {
-                // Task created successfully
                 console.log('Task created successfully');
                 window.location.reload(true);
-                // Add any additional logic you want to perform after successful task creation
             } else {
                 // Handle the case where the server returns an error
                 console.error('Failed to create task:', response.statusText);
@@ -100,8 +115,7 @@ const CreateTaskModal = ({ username }) => {
                     <button type="button" onClick={handleSubmit} id="submitButton">
                         Submit
                     </button>
-                    {showDropdown ? <CreateDropDown setIngredientHook={handleIngredientSelection} /> : undefined}
-                </div>
+                    {showDropdown ? <CreateDropDown setIngredientHook={handleIngredientSelection} ingredientNames={ingredientNames} /> : undefined}                </div>
             </div>
         </>
     );
