@@ -8,8 +8,8 @@ const CreateTaskModal = ({ username }) => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [pickedIngredient, setPickedIngredient] = useState("Pick an Ingredient");
     const [taskName, setTaskName] = useState("");
-    const [loggedIn, setLoggedIn] = useState(false);
     const [ingredientNames, setIngredientNames] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const fetchIngredientNames = async () => {
         try {
@@ -33,39 +33,11 @@ const CreateTaskModal = ({ username }) => {
         setShowDropdown(false);
     };
 
-    const handleLogin = async () => {
-        try {
-            const response = await fetch(`${urlBase}/api/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username: username,
-                    desc: taskName,
-                    ingredient: pickedIngredient,
-                }),
-            });
-    
-            if (response.ok) {
-                console.log('Logged in successfully');
-                setLoggedIn(true);
-            } else {
-                // Handle the case where the server returns an error
-                console.error('Failed to login:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error loggin in:', error.message);
-        }
-    };
-
     const handleSubmit = async () => {
-        if (!loggedIn) {
-            // If not logged in, perform login first
-            await handleLogin();
-        }
-
+        console.log('Handling submit...');
+        setLoading(true);
         try {
+            console.log('Sending POST request...');
             const response = await fetch(`${urlBase}/api/createTask`, {
                 method: 'POST',
                 headers: {
@@ -86,7 +58,10 @@ const CreateTaskModal = ({ username }) => {
             }
         } catch (error) {
             console.error('Error creating task:', error.message);
+        } finally {
+            setLoading(false); 
         }
+        console.log('Submit complete.');
         // Reset the form if needed
         setTaskName('');
         setPickedIngredient('Pick an Ingredient');
@@ -112,13 +87,14 @@ const CreateTaskModal = ({ username }) => {
                     >
                         {pickedIngredient}
                     </button>
-                    <button type="button" onClick={handleSubmit} id="submitButton">
-                        Submit
+                    <button type="button" onClick={handleSubmit} id="submitButton" disabled={loading}>
+                        {loading ? 'Submitting...' : 'Submit'}
                     </button>
-                    {showDropdown ? <CreateDropDown setIngredientHook={handleIngredientSelection} ingredientNames={ingredientNames} /> : undefined}                </div>
+                    {showDropdown ? <CreateDropDown setIngredientHook={handleIngredientSelection} ingredientNames={ingredientNames} /> : undefined}
+                </div>
             </div>
         </>
     );
-}
+};
 
 export { CreateTaskModal };

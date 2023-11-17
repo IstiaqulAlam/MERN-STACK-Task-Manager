@@ -393,7 +393,7 @@ router.get('/getUserTasks/:username', async (req, res, next) => {
     const userTasksInfo = [];
 
     // Iterate through the 'Tasks' array starting from the second index (index 1)
-    for (let i = 1; i < user.Tasks.length; i++) {
+    for (let i = 0; i < user.Tasks.length; i++) {
       const taskId = user.Tasks[i]; // Get the task ID from the user's 'Tasks' array
 
       // Find the task document by its ID

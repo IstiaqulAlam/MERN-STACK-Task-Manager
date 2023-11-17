@@ -27,7 +27,7 @@ const TaskList = async (username) => {
               ));
         } else {
             console.error('Failed to fetch tasks:', response.statusText);
-            return <p>Failed to fetch tasks</p>;
+            return <p>You have no tasks. Create one!</p>;
         }
     } catch (error) {
         console.error('Error fetching tasks:', error.message);
