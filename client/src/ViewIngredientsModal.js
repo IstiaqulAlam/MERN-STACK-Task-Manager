@@ -6,7 +6,6 @@ const YourIngredients = async (username) => {
           headers: {
               'Content-Type': 'application/json',
           },
-          // Add any additional headers or authentication tokens as needed
       });
 
       if (response.ok) {

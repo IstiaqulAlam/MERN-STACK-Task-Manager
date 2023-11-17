@@ -25,7 +25,7 @@ function LoginMERT() {
 
   return (
     <>
-      <h1>LifeQuests</h1>
+      <h1>Veggie Tasks</h1>
       <div className="container">
         <div className="login-box">
           <div className="form-title">Login</div>

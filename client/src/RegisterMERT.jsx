@@ -8,7 +8,7 @@ function RegisterMERT() {
     const [registerNotice, setRegisterNotice] = useState("Password must be 6 chars long and include a special character");
     return (
       <>
-        <h1>LifeQuests</h1>
+        <h1>Veggie Tasks</h1>
         <div className="container">
           <div className="register-box">
             <div className="form-title">Sign Up</div>

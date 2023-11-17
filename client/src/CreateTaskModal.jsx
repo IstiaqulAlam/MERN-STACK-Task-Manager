@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CreateDropDown } from './dropdown';
 
 const CreateTaskModal = ({ username }) => {
-    
+
     const urlBase = 'http://67.205.172.88:5000';
 
     const [showDropdown, setShowDropdown] = useState(false);
@@ -12,16 +12,18 @@ const CreateTaskModal = ({ username }) => {
     const [loading, setLoading] = useState(false);
 
     const fetchIngredientNames = async () => {
-        try {
-            const response = await fetch(`${urlBase}/api/getIngredientNames`);
-            if (response.ok) {
-                const data = await response.json();
-                setIngredientNames(data);
-            } else {
-                console.error('Failed to fetch ingredient names:', response.statusText);
+        if (ingredientNames.length === 0) {
+            try {
+                const response = await fetch(`${urlBase}/api/getIngredientNames`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setIngredientNames(data);
+                } else {
+                    console.error('Failed to fetch ingredient names:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error fetching ingredient names:', error.message);
             }
-        } catch (error) {
-            console.error('Error fetching ingredient names:', error.message);
         }
     };
 
@@ -53,13 +55,12 @@ const CreateTaskModal = ({ username }) => {
                 console.log('Task created successfully');
                 window.location.reload(true);
             } else {
-                // Handle the case where the server returns an error
                 console.error('Failed to create task:', response.statusText);
             }
         } catch (error) {
             console.error('Error creating task:', error.message);
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
         console.log('Submit complete.');
         // Reset the form if needed

@@ -41,7 +41,7 @@ function MainPage() {
 
   return (
     <>
-      <h1>LifeQuests</h1>
+      <h1>Veggie Tasks</h1>
       <div className="container">
         <div className="main-page-box">
           <div className="form-title">Welcome, {user}</div>
