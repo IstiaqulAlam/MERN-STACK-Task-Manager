@@ -7,7 +7,7 @@ class LoginScreen extends StatefulWidget {
   _LoginScreenState createState() => _LoginScreenState();
 }
 class _LoginScreenState extends State<LoginScreen> {
-  String message = "This is a message", newMessageText = '';
+  String message = "", newMessageText = '';
   String loginName = '', password = '';
 
   @override
@@ -17,143 +17,253 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.blue,
-    body: Container(
-        width: 200,
-        child:
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center, //Center Column contents vertically,
-          crossAxisAlignment: CrossAxisAlignment.center, //Center Column contents horizontal
-          children: <Widget>[
-        Row(
+
+    return Stack(
         children: <Widget>[
-          Container(
-          width: 200,
-          child:
-          TextField (
-            decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(),
-                labelText: 'Login Name',
-                hintText: 'Enter Your Login Name'
-            ),
-              onChanged: (text) {
-                loginName = text;
-              },
-          ),
-        ),
-        ]
-    ),
-    Row(
-      children: <Widget>[
+    //Background Image
       Container(
-        width: 200,
-        child:
-        TextField (
-          obscureText: true,
-          decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(),
-          labelText: 'Password',
-          hintText: 'Enter Your Password'
+        decoration: BoxDecoration(
+        image: DecorationImage(
+        image: AssetImage('assets/PixelBackground1.jpg'),
+        fit: BoxFit.cover,
+        //height: double.infinity,
+        //width: double.infinity,
+                ),
+              ),
+      ),
+      Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text('VeggieTasks'),
+        centerTitle: true,
+        shape: Border(
+          bottom: BorderSide(color: Colors.grey.withOpacity(0.2), width: 1.0),
+        ),
+        leading:
+          IconButton(
+            icon: Image.asset('assets/VeggieTasksIcon.png'),
+            onPressed: (){
+              Navigator.pushNamed(context, '/home');
+            },
           ),
-          onChanged: (text) {
-            password = text;
+      actions:[
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.menu),
+          onSelected: (value) {
+            Navigator.pushNamed(context, '/' "$value");
+            //print('Selected: $value');
+          },
+          itemBuilder: (BuildContext context){
+          return[
+            const PopupMenuItem<String>(
+              value: 'home',
+              child: Text('Home'),
+            ),
+            const PopupMenuItem<String>(
+              value: 'register',
+              child: Text('Sign Up'),
+            ),
+            const PopupMenuItem<String>(
+              value: 'About Us',
+              child: Text('about'),
+            ),
+          ];
           },
         ),
-      ),
-      ]
+    ],
     ),
 
+        body: Center(
+          child: Container(
+            height: 400,
+            width: 350,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10.0)
+            ),
+
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: EdgeInsets.only(top: 60.0),
+            child: Column(
+          //mainAxisAlignment: MainAxisAlignment.center, //Center Column contents vertically,
+          //crossAxisAlignment: CrossAxisAlignment.center, //Center Column contents horizontal
+          children: [
+              Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  "Login",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 34.0,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+                      ],
+            ),
+            SizedBox(height: 15.0),
             Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 300,
+                    height: 70,
+                    child:
+                    TextField (
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(40.0)
+                          ),
+                          labelText: 'Username',
+                          hintText: 'Enter Your Login Name'
+                      ),
+                      onChanged: (text) {
+                        loginName = text;
+                      },
+                    ),
+                  ),
+                ]
+            ),
+            SizedBox(height: 10.0),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    width: 300,
+                    height: 70,
+                    child:
+                    TextField (
+                      obscureText: true,
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(40.0)
+                          ),
+                          labelText: 'Password',
+                          hintText: 'Enter Your Password'
+                      ),
+                      onChanged: (text) {
+                        password = text;
+                      },
+                    ),
+                  ),
+                ]
+            ),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text('$message',style: TextStyle(fontSize: 14 ,color:Colors.black)),
               ],
             ),
 
-    Row(
-    children: <Widget>[
-        ElevatedButton(
-          onPressed: () async
-          {
-            newMessageText = "";
-            changeText();
-            String payload = '{"username":"' + loginName.trim() + '","password":"' + password.trim() + '"}';
-            String? userId = "";
-            List<dynamic> labels;
-            var jsonObject;
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () async
+                  {
+                    newMessageText = "";
+                    changeText();
+                    String payload = '{"username":"' + loginName.trim() + '","password":"' + password.trim() + '"}';
+                    String? userId = "";
+                    List<dynamic> labels;
+                    var jsonObject;
 
-            try
-            {
-              String url = 'http://cop4331group2.com:5000/api/login';
-              String ret = await CardsData.getJson(url, payload);
-              Map<String, dynamic> jsonObject = json.decode(ret);
-              labels= jsonObject["msg"];
-              for(var label in labels) {
-                userId = label["_id"];
-              }
+                    try
+                    {
+                      String url = 'http://cop4331group2.com:5000/api/login';
 
-            }
-            catch(e)
-            {
-              print("Error in login request: $e");
-              newMessageText = "error message";
-              changeText();
-              return;
-            }
-            if( userId == null )
-            {
-              newMessageText = "Incorrect Login/Password";
-              changeText();
-            }
-            else {
-              print("else statement");
-              for(var label in labels) {
-                GlobalData.userId = userId;
-                print("did  get past userID");
-                print(label["FirstName:"]);
-                GlobalData.firstname = label["FirstName"];
-                print("did get past first name");
-                GlobalData.lastname = label["LastName"];
-                GlobalData.loginName = loginName;
-                Navigator.pushNamed(context, '/cards');
-              }
-            }
+                      String ret = await CardsData.getJson(url, payload);
+                      Map<String, dynamic> jsonObject = json.decode(ret);
+                      labels= jsonObject["msg"];
+                      for(var label in labels) {
+                        userId = label["_id"];
+                      }
 
-          },
-          style: ElevatedButton.styleFrom(
-              backgroundColor:Colors.brown[50],
-              foregroundColor: Colors.black,
-              padding: EdgeInsets.all(2.0),
-              disabledBackgroundColor: Colors.grey[100]
-          ),
-          child: Text('Login',style: TextStyle(fontSize: 14 ,color:Colors.black)),
-        )
-    ],
+                    }
+                    catch(e)
+                    {
+                      print("Error in login request: $e");
+                      newMessageText = "error message";
+                      changeText();
+                      return;
+                    }
+                    if( userId == null )
+                    {
+                      newMessageText = "Incorrect Login/Password";
+                      changeText();
+                    }
+                    else {
+                      print("else statement");
+                      for(var label in labels) {
+                        GlobalData.userId = userId;
+                        print("did  get past userID");
+                        print(label["FirstName:"]);
+                        GlobalData.firstname = label["FirstName"];
+                        print("did get past first name");
+                        GlobalData.lastname = label["LastName"];
+                        GlobalData.loginName = loginName;
+                        Navigator.pushNamed(context, '/main');
+                      }
+                    }
+
+                  },
+                  style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0)
+                      ),
+                      backgroundColor:Colors.yellow[100],
+                      foregroundColor: Colors.black,
+                      padding: EdgeInsets.all(2.0),
+                      disabledBackgroundColor: Colors.grey[100]
+                  ),
+                  child: Text('Sign In',style: TextStyle(fontSize: 14 ,color:Colors.black)),
+                )
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  "Don't Have an account?",
+                  style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.normal,
+                ),
+                ),
+                ElevatedButton(
+                  onPressed: () async
+                  {
+                    Navigator.pushNamed(context, '/register');
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor:Colors.transparent,
+                      elevation: 0,
+                      //foregroundColor: Colors.black,
+                      padding: EdgeInsets.all(2.0),
+                      //disabledBackgroundColor: Colors.grey[100]
+                  ),
+                  child: Text('Sign Up',style: TextStyle(fontSize: 18 ,color:Colors.blueAccent)),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
     ),
-        Row(
-            children: <Widget>[
-            ElevatedButton(
-            onPressed: () async
-        {
-        Navigator.pushNamed(context, '/register');
-        },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor:Colors.brown[50],
-                  foregroundColor: Colors.black,
-                  padding: EdgeInsets.all(2.0),
-                  disabledBackgroundColor: Colors.grey[100]
-              ),
-              child: Text('Go Register',style: TextStyle(fontSize: 14 ,color:Colors.black)),
-            )
-            ],
-        )
+    ),
+      ),
+      ),
     ],
-    )
-    )
     );
   }
 
