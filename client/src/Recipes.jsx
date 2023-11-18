@@ -10,14 +10,22 @@ function Recipes() {
   const user = location.state?.user;
   const navigate = useNavigate();
 
-  const [ingredients, setIngredients] = useState();
+  const [ingredients, setIngredients] = useState([]);
+  const [loadingIngredients, setLoadingIngredients] = useState(true);
   const [showModalIngredients, setShowModalIngredients] = useState(false);
   const [userRecipes, setUserRecipes] = useState([]);
 
   const getIngredients = async () => {
-    loginWithStoredCredentials();
-    setIngredients(await YourIngredients(user));
+    try {
+      const ingredientsData = await YourIngredients(user);
+      setIngredients(ingredientsData);
+    } catch (error) {
+      console.error('Error fetching ingredients:', error.message);
+    } finally {
+      setLoadingIngredients(false);
+    }
   };
+  
   const getUserRecipes = async () => {
     try {
       const response = await fetch(`http://67.205.172.88:5000/api/getUserRecipes/${user}`);
@@ -32,7 +40,6 @@ function Recipes() {
       console.error('Error fetching user recipes:', error);
     }
   };
-  getUserRecipes();
 
   const redeemRecipe = async (recipeName) => {
     try {
@@ -50,9 +57,11 @@ function Recipes() {
     }
   };
 
-  // Fetch ingredients when the component mounts
-  if (ingredients === undefined) {
+  if (loadingIngredients) {
     getIngredients();
+  }
+  if (userRecipes.length === 0) {
+    getUserRecipes();
   }
 
   return (
@@ -60,16 +69,25 @@ function Recipes() {
       <h1>Veggie Tasks</h1>
       <div className="container">
         <div className="main-page-box">
-          <div className="form-title">Recipes</div>
-          <button type="button" className="button_mainpage" onClick=
-          {() => 
-          navigate('/mainpage', { state: { user } })}
-
-          
-          id="ShowTasksBUtton">View Tasks</button>
+        <div className="form-title">Recipes</div>
+          <button type="button" className="button_mainpage" onClick={() => navigate('/mainpage', { state: { user }})} id="ShowTasksBUtton">View Tasks</button>
           <button type="button" className="button_mainpage" onClick={() => setShowModalIngredients(true)} id="YourIngredientsButton">Your Ingredients</button>
-            {showModalIngredients ? ingredients: undefined}
-            {showModalIngredients ? <div id="overlay" onClick={() => setShowModalIngredients(false)}></div> : undefined}
+          {loadingIngredients && <p>Loading ingredients...</p>}
+            {!loadingIngredients && showModalIngredients && (
+              <>
+                <div className="modalContainer">
+                  <div className="modalBox">
+                    <p>Your Ingredients</p>
+                    <ul>
+                      {ingredients.map((ingredient, index) => (
+                        <li key={index}>{ingredient}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </>
+            )}
+            {!loadingIngredients && showModalIngredients && <div id="overlay" onClick={() => setShowModalIngredients(false)}></div>}
       <MDBTable>
       <MDBTableHead>
         <tr>
