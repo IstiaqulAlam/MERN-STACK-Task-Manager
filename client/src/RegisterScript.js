@@ -14,9 +14,11 @@ async function Register() {
     if (firstname === "" || lastname === "" || email === "" || username === "" || password === "" || retypePassword === "") {
       return "Please fill out all fields";
     }
+    // Must be 6 or more chars and have a special char
     else if (password.length < 6 || !hasSpecialCharacter(password)) {
       return "Your password did not meet complexity requirements";
     }
+    // Password and retype password fields must match
     else if (password !== retypePassword) {
       return "Your passwords do not match";
     }

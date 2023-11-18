@@ -392,7 +392,7 @@ router.get('/getUserTasks/:username', async (req, res, next) => {
     // Initialize an array to store task information
     const userTasksInfo = [];
 
-    // Iterate through the 'Tasks' array starting from the second index (index 1)
+    // Iterate through the 'Tasks' array starting from the first index
     for (let i = 0; i < user.Tasks.length; i++) {
       const taskId = user.Tasks[i]; // Get the task ID from the user's 'Tasks' array
 
@@ -534,7 +534,7 @@ router.put('/editTask/:taskId', async (req, res, next) => {
   }
 });
 
-// Add CORS middleware to allow requests from any origin (you can configure this to be more restrictive)
+// Allow requests from any origin
 router.use(cors());
 
 module.exports = router;

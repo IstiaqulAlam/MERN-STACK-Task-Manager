@@ -3,7 +3,6 @@ import './styles.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { YourIngredients } from './ViewIngredientsModal';
 import { MDBTable, MDBTableHead, MDBTableBody } from 'mdb-react-ui-kit';
-import { loginWithStoredCredentials } from './AutoLogin';
 
 function Recipes() {
   const location = useLocation();
@@ -49,6 +48,7 @@ function Recipes() {
 
       if (response.ok) {
         console.log(`Recipe ${recipeName} redeemed successfully!`);
+        window.location.reload(true);
       } else {
         console.error('Failed to redeem recipe:', response.status, response.statusText);
       }
