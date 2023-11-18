@@ -86,8 +86,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   //mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                  'Make Life',
+                  DefaultTextStyle(
+                  child: Text('Make Life'),
                   style: TextStyle(
                   color: Colors.white,
                   fontSize: 44.0,
@@ -95,8 +95,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   ),
                   const SizedBox(height: 10.0),
-                  const Text(
-                    'A Game',
+                  DefaultTextStyle(
+                    child: Text('A Game'),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 44.0,

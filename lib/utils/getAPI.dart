@@ -70,4 +70,5 @@ class CardsData {
       return ret;
     }
   }
+
 }

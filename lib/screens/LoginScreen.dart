@@ -66,8 +66,8 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Text('Sign Up'),
             ),
             const PopupMenuItem<String>(
-              value: 'About Us',
-              child: Text('about'),
+              value: 'about',
+              child: Text('About'),
             ),
           ];
           },

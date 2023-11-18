@@ -278,15 +278,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         if(password == passwordRepeat) {
                           try {
                             String url = 'http://cop4331group2.com:5000/api/register';
-                            print("payload is probably the problem");
                             String ret = await CardsData.postJson(url, payload);
-                            print("payload was not the problem");
-                            print(payload);
-                            print(ret);
 
                             Map<String, dynamic> jsonObject = json.decode(ret);
-
-
 
                           }
                           catch (e) {
