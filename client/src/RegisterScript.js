@@ -1,23 +1,25 @@
-import isAlpha from 'stringutilsjs';
-
 async function Register() {
   const firstname = document.getElementById("firstname").value;
   const lastname = document.getElementById("lastname").value;
   const email = document.getElementById("email").value;
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
+  const retypePassword = document.getElementById("retypePassword").value;
 
   const urlBase = 'http://67.205.172.88:5000';
 
   const doRegister = async () => {
 
-    if (firstname === "" || lastname === "" || email === "" || username === "" || password === "") {
-        // Check if any of the required fields are empty
-        return "Fill out all fields";
-      }
-      else if (password.length < 6 || isAlpha(password)) {
-        return "Password did not meet compelxity requirments";
-      }
+    // Check if any of the required fields are empty
+    if (firstname === "" || lastname === "" || email === "" || username === "" || password === "" || retypePassword === "") {
+      return "Please fill out all fields";
+    }
+    else if (password.length < 6 || !hasSpecialCharacter(password)) {
+      return "Your password did not meet complexity requirements";
+    }
+    else if (password !== retypePassword) {
+      return "Your passwords do not match";
+    }
 
     try {
 
@@ -34,26 +36,29 @@ async function Register() {
           password: password
         }),
       });
-      
-      //If any field is empty
-      //Proceed with registration check
+
       if (response.ok) {
         const jsonObject = await response.json();
 
         if (jsonObject.err) {
-          console.log(JSON.stringfy(jsonObject));
+          console.log(JSON.stringify(jsonObject));
+          return "Failed to register. Username or Email already taken";
         } else {
           console.log(JSON.stringify(jsonObject));
+          return "Registration Complete";
         }
       } else {
-        return "Registeration Complete";
+        return "Registration Complete";
       }
-      
     } catch (err) {
       return "Failed to register";
     }
-    return "Registeration Complete";
   };
+
+  function hasSpecialCharacter(str) {
+    var specialCharacters = /[!@#$%^&*(),.?":{}|<>]/;
+    return specialCharacters.test(str);
+  }
 
   return await doRegister();
 }

@@ -5,7 +5,7 @@ import { Register } from './RegisterScript';
 
 function RegisterMERT() {
 
-    const [registerNotice, setRegisterNotice] = useState("Password must be 6 chars long and include a special character");
+    const [registerNotice, setRegisterNotice] = useState("Please ensure that your password is 6 or more characters long and includes a special character.");
     return (
       <>
         <h1>Veggie Tasks</h1>
