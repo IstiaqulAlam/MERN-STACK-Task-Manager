@@ -140,9 +140,6 @@ function Recipes() {
     </MDBTable>
         </div>
       </div>
-      <div className="mountain left-mountain"></div>
-      <div className="mountain right-mountain"></div>
-      <div className="sun"></div>
       <script src="LoginScript.js"></script>
     </>
   );
