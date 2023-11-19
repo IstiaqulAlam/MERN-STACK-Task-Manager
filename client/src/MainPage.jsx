@@ -13,6 +13,8 @@ function MainPage() {
   const [showModalIngredients, setShowModalIngredients] = useState(false);
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [loadingIngredients, setLoadingIngredients] = useState(true);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [taskIdToDelete, setTaskIdToDelete] = useState(null);
 
   const location = useLocation();
   const user = location.state?.user;
@@ -52,6 +54,25 @@ function MainPage() {
 
   const navigate = useNavigate();
 
+  const handleDeleteClick = (taskId) => {
+    setTaskIdToDelete(taskId);
+    setShowDeleteConfirmation(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (taskIdToDelete !== null) {
+      handleDelete(taskIdToDelete, user);
+      setTaskIdToDelete(null);
+      setShowDeleteConfirmation(false);
+      // You may want to reload tasks or update state here
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setTaskIdToDelete(null);
+    setShowDeleteConfirmation(false);
+  };
+
   return (
     <>
       <h1>Veggie Tasks</h1>
@@ -71,7 +92,7 @@ function MainPage() {
                 <button
                   type="button"
                   className="delete-button"
-                  onClick={() => handleDelete(task._id, user)}
+                  onClick={() => handleDeleteClick(task._id)}
                 >
                   Delete
                 </button>
@@ -84,6 +105,19 @@ function MainPage() {
                 </button>
               </div>
             ))}
+
+            {showDeleteConfirmation && (
+              <>
+                <div id="overlay" onClick={handleCancelDelete}></div>
+                <div className="modalContainer">
+                  <div className="modalBox">
+                    <p>Are you sure you want to delete this task?</p>
+                    <button type="button" onClick={handleConfirmDelete}>Yes</button>
+                    <button type="button" onClick={handleCancelDelete}>No</button>
+                  </div>
+                </div>
+              </>
+            )}
             {showModalTask ? <CreateTaskModal username={user} /> : undefined}
             {showModalTask ? <div id="overlay" onClick={() => setShowModalTask(false)}></div> : undefined}
             {loadingIngredients && <p>Loading ingredients...</p>}
