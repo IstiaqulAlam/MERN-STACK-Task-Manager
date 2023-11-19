@@ -64,7 +64,6 @@ function MainPage() {
       handleDelete(taskIdToDelete, user);
       setTaskIdToDelete(null);
       setShowDeleteConfirmation(false);
-      // You may want to reload tasks or update state here
     }
   };
 
