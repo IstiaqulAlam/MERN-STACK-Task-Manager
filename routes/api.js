@@ -4,6 +4,8 @@ const cors = require('cors');
 const Todo = require('../models/todo');
 const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
+const nodemailer = require('nodemailer');
+
 require('dotenv').config()
 
 router.get('/get', (req, res, next) => {
@@ -46,54 +48,140 @@ router.post('/register', async (req, res, next) => {
   const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const collection = database.collection('Users');
+  const unverifiedCollection = database.collection('Unverified Users');
+  try {
+    console.log("Inside /register endpoint");
+
+    const existingUserByUsername = await collection.findOne({ Username: req.body.username });
+    const existingUserByEmail = await collection.findOne({ Email: req.body.email });
+
+    if (existingUserByUsername) {
+      res.json({
+        err: "Username is already taken. Please choose a different username."
+      });
+      return;
+    }
+    if (existingUserByEmail) {
+      res.json({
+        err: "Email is already registered. Please use a different email address."
+      });
+      return;
+    }
+
+    // Generate a verification code
+    const verificationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.zoho.com',
+        port: 465,
+        secure: true,
+      auth: {
+          user: 'nodemailer123321@zohomail.com',
+          pass: 'H4xmwLbJa0zU',
+        },
+    });
+
+    // Send verification code via email
+    const mailOptions = {
+      from: 'nodemailer123321@zohomail.com',
+      to: 'dragonking0712@gmail.com',
+      subject: 'Veggie Tasks Verification Code',
+      text: verificationCode,
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.error('Email sending failed:', error);
+        res.status(500).json({ err: 'Email sending failed' });
+        return;
+      } else {
+        console.log('Email sent:', info.response);
+      }
+    });
+
+    // Store user information in the "Unverified Users" database
+    const date = new Date();
+    const id = new ObjectId();
+    await unverifiedCollection.insertOne({
+      _id: id,
+      FirstName: req.body.firstname,
+      LastName: req.body.lastname,
+      Username: req.body.username,
+      Password: req.body.password,
+      DateCreated: date,
+      DateLastLoggedIn: "",
+      Email: req.body.email,
+      Recipes: [],
+      Tasks: [],
+      VerifyCode: verificationCode
+    });
+
+    res.json({
+      success: true,
+      message: "Check your email for verification."
+    });
+
+  } catch (error) {
+    console.error("Error during registration:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    client.close(); 
+  }
+});
+
+router.post('/verify', async (req, res, next) => {
+  const client = await MongoClient.connect(process.env.DB);
+  const database = client.db('COP4331');
+  const collection = database.collection('Users');
+  const unverifiedCollection = database.collection('Unverified Users');
   const basketsCollection = database.collection('Baskets');
-    // Check if the username or email already exists
-  const existingUserByUsername = await collection.findOne({ Username: req.body.username });
-  const existingUserByEmail = await collection.findOne({ Email: req.body.email });
 
-  if (existingUserByUsername) {
-    res.json({
-      err: "Username is already taken. Please choose a different username."
-    });
-    await client.close();
-    return;
+  try {
+    console.log("Inside /verify endpoint");
+    
+    const verificationCodeMatches = await unverifiedCollection.findOne({ VerifyCode: req.body.verificationCode });
+
+
+      const FirstNameQuery = verificationCodeMatches.FirstName;
+      const LastNameQuery = verificationCodeMatches.LastName;
+      const UsernameQuery = verificationCodeMatches.Username;
+      const PasswordQuery = verificationCodeMatches.Password;
+      const EmailQuery = verificationCodeMatches.Email;
+      const date = new Date();
+      const id = new ObjectId();
+
+      // Insert the user into the 'Users' collection
+      await collection.insertOne({
+        _id: id,
+        FirstName: FirstNameQuery,
+        LastName: LastNameQuery,
+        Username: UsernameQuery,
+        Password: PasswordQuery,
+        DateCreated: date,
+        DateLastLoggedIn: "",
+        Email: EmailQuery,
+        Recipes: [],
+        Tasks: [],
+      });
+
+      // Remove the entire document from the 'Unverified Users' collection
+      await unverifiedCollection.deleteOne({ VerifyCode: req.body.verificationCode });
+      const baskId = new ObjectId();
+      // Insert a new basket document in the 'Baskets' collection
+      await basketsCollection.insertOne({
+        _id: baskId,
+        User: UsernameQuery, // Assuming the 'User' field is related to the username
+        Ingredients: []
+      });
+
+      res.json({
+        success: true,
+        message: "User is successfully verified and registered."
+      });
+    } catch (error) {
+    console.error("Error during verification:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    client.close();
   }
-
-  if (existingUserByEmail) {
-    res.json({
-      err: "Email is already registered. Please use a different email address."
-    });
-    await client.close();
-    return;
-  }
-  
-  const id = new ObjectId();
-  const date = new Date();
-  await collection.insertOne({
-    _id: id,
-    FirstName: req.body.firstname,
-    LastName: req.body.lastname,
-    Username: req.body.username,
-    Password: req.body.password,
-    DateCreated: date,
-    DateLastLoggedIn: "",
-    Email: req.body.email,
-    Recipes: [],
-    Tasks: []
-  })
-
-  const baskId = new ObjectId();
-  // Insert a new basket document in the 'Baskets' collection
-  await basketsCollection.insertOne({
-    _id: baskId,
-    User: req.body.username, // Assuming the 'User' field is related to the username
-    Ingredients: []
-  });
-
-  res.json({
-      msg: "User registered"
-  });
-  await client.close();
 });
 
 router.put('/updateLastLoggedIn', async (req, res, next) => {
@@ -114,6 +202,7 @@ router.put('/updateLastLoggedIn', async (req, res, next) => {
   }
   await client.close();
 });
+
 
 //endpoint for creating a task
 router.post('/createTask', async (req, res, next) => {
@@ -392,7 +481,7 @@ router.get('/getUserTasks/:username', async (req, res, next) => {
     // Initialize an array to store task information
     const userTasksInfo = [];
 
-    // Iterate through the 'Tasks' array starting from the first index
+    // Iterate through the 'Tasks' array starting from the second index (index 1)
     for (let i = 0; i < user.Tasks.length; i++) {
       const taskId = user.Tasks[i]; // Get the task ID from the user's 'Tasks' array
 
@@ -534,7 +623,7 @@ router.put('/editTask/:taskId', async (req, res, next) => {
   }
 });
 
-// Allow requests from any origin
+// Add CORS middleware to allow requests from any origin (you can configure this to be more restrictive)
 router.use(cors());
 
 module.exports = router;
