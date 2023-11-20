@@ -22,9 +22,8 @@ function VerificationPage() {
     <>
       <h1>Veggie Tasks - Email Verification</h1>
       <div className="container">
-        <div className="verification-box">
-          <div className="form-title"
-          >Verification</div>
+        <div className="verify-box">
+          <div className="form-title">Verification</div>
           <form className="verification-form">
             <label className="h5" htmlFor="verificationCode">Verification Code:</label>
             <input className="rounded-pill p-2 mb-4" id="verificationCode" type="text" placeholder="Verifican Code:" required />
@@ -33,6 +32,9 @@ function VerificationPage() {
           </form>
           <div id="verificationNotice"></div>
         </div>
+      <div className="mountain left-mountain"></div>
+      <div className="mountain right-mountain"></div>
+      <div className="sun"></div>
       </div>
     </>
   );

@@ -7,7 +7,7 @@ async function Register() {
   const password = document.getElementById("password").value;
   const retypePassword = document.getElementById("retypePassword").value; // Assuming you have this field
 
-  const urlBase = 'http://67.205.172.88:5000';
+  const urlBase = 'http://cop4331group2.com:5000';
 
   // Check if any of the required fields are empty
   if (firstname === "" || lastname === "" || email === "" || username === "" || password === "" || retypePassword === "") {

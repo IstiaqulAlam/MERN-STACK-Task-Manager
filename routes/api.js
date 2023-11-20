@@ -50,19 +50,18 @@ router.post('/register', async (req, res, next) => {
   const collection = database.collection('Users');
   const unverifiedCollection = database.collection('Unverified Users');
   try {
-    console.log("Inside /register endpoint");
 
     const existingUserByUsername = await collection.findOne({ Username: req.body.username });
     const existingUserByEmail = await collection.findOne({ Email: req.body.email });
 
     if (existingUserByUsername) {
-      res.json({
+      res.status(500).json({
         err: "Username is already taken. Please choose a different username."
       });
       return;
     }
     if (existingUserByEmail) {
-      res.json({
+      res.status(500).json({
         err: "Email is already registered. Please use a different email address."
       });
       return;
@@ -76,20 +75,19 @@ router.post('/register', async (req, res, next) => {
         secure: true,
       auth: {
           user: 'nodemailer123321@zohomail.com',
-          pass: 'H4xmwLbJa0zU',
+          pass: process.env.EMAILPWD,
         },
     });
 
     // Send verification code via email
     const mailOptions = {
       from: 'nodemailer123321@zohomail.com',
-      to: 'dragonking0712@gmail.com',
+      to: req.body.email,
       subject: 'Veggie Tasks Verification Code',
       text: verificationCode,
     };
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
-        console.error('Email sending failed:', error);
         res.status(500).json({ err: 'Email sending failed' });
         return;
       } else {

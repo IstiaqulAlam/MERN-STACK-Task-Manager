@@ -1,5 +1,5 @@
 body {
-    background-image: url("vegieTaskBG1080p.png");
+    background-color: #3498db;
     background-size: 100% auto;
     position: relative;
 }
@@ -60,6 +60,17 @@ table {
     position: relative;
 }
 
+.verify-box {
+    background-color: #ffffff;
+    padding: 2em;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 25%;
+    text-align: center;
+    height: 25%;
+    position: relative;
+}
+
 .register-box {
     background-color: #ffffff;
     padding: 2em;
@@ -90,6 +101,14 @@ table {
 }
 
 .login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+.verify-form {
     display: flex;
     flex-direction: column;
     align-items: center;
