@@ -4,6 +4,7 @@ import LoginMERT from './LoginMERT';
 import RegisterMERT from './RegisterMERT';
 import MainPage from './MainPage';
 import Recipes from './Recipes';
+import VerificationPage from './VerificationPage'; 
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/login" element={<LoginMERT />} />
         <Route path="/mainpage" element={<MainPage />} />
         <Route path="/recipes" element={<Recipes />} />
+        <Route path="/verify" element={<VerificationPage />} /> 
       </Routes>
     </Router>
   );
