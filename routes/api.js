@@ -53,6 +53,8 @@ router.post('/register', async (req, res, next) => {
 
     const existingUserByUsername = await collection.findOne({ Username: req.body.username });
     const existingUserByEmail = await collection.findOne({ Email: req.body.email });
+    const existingUserByUsernameUnverified = await unverifiedCollection.findOne({ Username: req.body.username });
+    const existingUserByEmailUnverified = await unverifiedCollection.findOne({ Email: req.body.email });
 
     if (existingUserByUsername) {
       res.status(500).json({
@@ -61,6 +63,18 @@ router.post('/register', async (req, res, next) => {
       return;
     }
     if (existingUserByEmail) {
+      res.status(500).json({
+        err: "Email is already registered. Please use a different email address."
+      });
+      return;
+    }
+    if (existingUserByUsernameUnverified) {
+      res.status(500).json({
+        err: "Username is already taken. Please choose a different username."
+      });
+      return;
+    }
+    if (existingUserByEmailUnverified) {
       res.status(500).json({
         err: "Email is already registered. Please use a different email address."
       });
