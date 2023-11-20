@@ -1,6 +1,6 @@
 async function Verify() {
   const verificationCode = document.getElementById("verificationCode").value;
-  const urlBase = 'http://67.205.172.88:5000';
+  const urlBase = 'http://cop4331group2.com:5000';
   
     const response = await fetch(`${urlBase}/api/verify`, {
       method: 'POST',
