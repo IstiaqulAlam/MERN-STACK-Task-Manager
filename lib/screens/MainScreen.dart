@@ -14,6 +14,11 @@ class _MainScreenState extends State<MainScreen> {
   String username = GlobalData.loginName;
   String desc = '', ingredient = '';
   List<Map<String, dynamic>> userTasks = [];
+  List<Map<String, dynamic>> originalUserTasks = [];
+  String searchText = '';
+  FocusNode searchFocusNode = FocusNode();
+
+
 
   List<Task> tasks = [
     Task('Task 1', 'Description for Task 1',),
@@ -25,6 +30,14 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     fetchUserTasks();
+    originalUserTasks = List<Map<String, dynamic>>.from(userTasks);
+    searchFocusNode.addListener(() {
+      if (!searchFocusNode.hasFocus) {
+        setState(() {
+          searchText = '';
+        });
+      }
+    });
   }
 
   Future<void> fetchUserTasks() async {
@@ -42,6 +55,7 @@ class _MainScreenState extends State<MainScreen> {
         //ret= json.decode(response.body);
         setState(() {
           userTasks = List<Map<String, dynamic>>.from(jsonResponse);
+          originalUserTasks = List<Map<String, dynamic>>.from(userTasks);
         });
         print(userTasks);
       } else {
@@ -53,6 +67,33 @@ class _MainScreenState extends State<MainScreen> {
       print("catch statement");
       print(e.toString());
       ret= "Error Occured";
+    }
+  }
+
+  Future<void> editTask(String taskId, String newDesc, String newIngredient) async {
+    try {
+      String url = 'http://cop4331group2.com:5000/api/editTask/$taskId';
+      String payload = jsonEncode({
+        'desc': newDesc,
+        'ingredient': newIngredient,
+      });
+
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: payload,
+      );
+
+      if (response.statusCode == 200) {
+        // Task edited successfully
+        print('Task edited successfully');
+        // You might want to update your local state or refresh the task list
+      } else {
+        // Handle errors here
+        print('Failed to edit task: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error during task editing: $e');
     }
   }
 
@@ -109,29 +150,11 @@ class _MainScreenState extends State<MainScreen> {
                 },
               ),
               actions: [
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.menu),
-                  onSelected: (value) {
-                    Navigator.pushNamed(context, '/' "$value");
-                    //print('Selected: $value');
-                  },
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      const PopupMenuItem<String>(
-                        value: 'login',
-                        child: Text('Sign In'),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'register',
-                        child: Text('Sign Up'),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'about',
-                        child: Text('About'),
-                      ),
-                    ];
-                  },
-                )
+                Positioned(
+                  top: 16.0,
+                  right: 16.0,
+                  child: CustomPopupMenu(), // Use the CustomPopupMenu widget
+                ),
               ]
           ),
           body: Center(
@@ -142,6 +165,23 @@ class _MainScreenState extends State<MainScreen> {
                 child: Column(
                   //mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    GestureDetector(
+                      onTap: () {
+                        FocusScope.of(context).requestFocus(searchFocusNode);
+                      },
+                      child: TextField(
+                        focusNode: searchFocusNode,
+                        onChanged: (value) {
+                          setState(() {
+                            searchText = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Search Tasks',
+                          prefixIcon: Icon(Icons.search),
+                        ),
+                      ),
+                    ),
                     ElevatedButton(
                       onPressed: () async
                       {
@@ -202,25 +242,37 @@ class _MainScreenState extends State<MainScreen> {
                       child: ListView.builder(
                         itemCount: userTasks.length,
                         itemBuilder: (context, index) {
-                          final task= userTasks[index];
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: Colors.lightBlue.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(10.0)
-                            ),
-                            margin: EdgeInsets.all(8.0),
-                            child: ListTile(
-                              title: Text(task['Desc']),
-                              subtitle: Text('${task['Ingredient']}'),
-                              trailing: IconButton(
-                                icon: Icon(Icons.delete),
-                                onPressed: () {
-                                  // Call the deleteTask function when the delete button is pressed
-                                  onDeleteTaskPressed(username, task['_id']);
-                                },
+                          print("Length of originalUserTasks: ${originalUserTasks.length}");
+                          final task= originalUserTasks[index];
+                          // Check if the task matches the search query (only if searchText is not empty)
+                          if (searchText.isEmpty || task['Desc'].toLowerCase().contains(searchText.toLowerCase())) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.lightBlue.withOpacity(0.7),
+                                  borderRadius: BorderRadius.circular(10.0)
                               ),
-                            ),
-                          );
+                              margin: EdgeInsets.all(8.0),
+                              child: ListTile(
+                                title: Text(task['Desc']),
+                                subtitle: Text('${task['Ingredient']}'),
+                                onTap: () {
+                                  _showEditTaskDialog(
+                                      username, task['_id'], task['Desc'],
+                                      task['Ingredient']);
+                                  setState(() {});
+                                },
+                                trailing: IconButton(
+                                  icon: Icon(Icons.delete),
+                                  onPressed: () {
+                                    // Call the deleteTask function when the delete button is pressed
+                                    onDeleteTaskPressed(username, task['_id']);
+                                  },
+                                ),
+                              ),
+                            );
+                          } else{
+                            return Container();
+                          }
                         },
                       ),
                     ),
@@ -339,6 +391,109 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  Future<void> _showEditTaskDialog(String username, String taskId, String currentDesc, String currentIngredient) async {
+    TextEditingController descriptionController = TextEditingController(text: currentDesc);
+    TextEditingController ingredientController = TextEditingController(text: currentIngredient);
+
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit Task'),
+          content: Column(
+            children: [
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(labelText: 'Task/Description'),
+              ),
+              TextField(
+                controller: ingredientController,
+                decoration: InputDecoration(labelText: 'Details/Ingredients'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Save Changes'),
+              onPressed: () async {
+                await editTask(taskId, descriptionController.text, ingredientController.text);
+                Navigator.of(context).pop();
+                setState(() {});
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+}
+
+class CustomPopupMenu extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.more_vert, color: Colors.white),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return CustomMenuDialog();
+          },
+        );
+      },
+    );
+  }
+}
+
+class CustomMenuDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      backgroundColor: Colors.white,
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text('Sign In'),
+              onTap: () {
+                // Handle item 1 click
+                Navigator.pushNamed(context, '/login');
+              },
+            ),
+            ListTile(
+              title: Text('Sign Up'),
+              onTap: () {
+                // Handle item 2 click
+                Navigator.pushNamed(context, '/register');
+              },
+            ),
+
+            ListTile(
+              title: Text('About Us'),
+              onTap: () {
+                // Handle item 2 click
+                Navigator.pushNamed(context, '/about');
+              },
+            ),
+            // Add more list items as needed
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class Task{
