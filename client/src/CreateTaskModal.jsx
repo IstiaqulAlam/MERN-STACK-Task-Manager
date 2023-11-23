@@ -11,6 +11,7 @@ const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
     const [taskName, setTaskName] = useState("");
     const [ingredientNames, setIngredientNames] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const fetchIngredientNames = async () => {
         if (ingredientNames.length === 0) {
@@ -38,6 +39,15 @@ const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
 
     const handleSubmit = async () => {
         console.log('Handling submit...');
+
+        // Check if either task name or picked ingredient is not filled out
+        if (!taskName || pickedIngredient === 'Pick an Ingredient') {
+            const errorMessage = 'Please fill out both fields.';
+            console.error('Please fill out both fields.');
+            setError(errorMessage);
+            return;
+        }
+
         setLoading(true);
         try {
             console.log('Sending POST request...');
@@ -97,6 +107,7 @@ const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
                         {loading ? 'Submitting...' : 'Submit'}
                     </button>
                     {showDropdown ? <CreateDropDown setIngredientHook={handleIngredientSelection} ingredientNames={ingredientNames} /> : undefined}
+                    {error && <p className="error-message">{error}</p>}
                 </div>
             </div>
         </>

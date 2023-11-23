@@ -23,6 +23,9 @@ function MainPage() {
   const [newDesc, setNewDesc] = useState('');
   const [newIngredient, setNewIngredient] = useState('Select an Ingredient'); // Set default text
   const [showDropdown, setShowDropdown] = useState(false);
+  const [error, setError] = useState('');
+  const [loadingIngredientNames, setLoadingIngredientNames] = useState(true);
+  const [ingredientNames, setIngredientNames] = useState([]);
 
   const location = useLocation();
   const user = location.state?.user;
@@ -86,8 +89,17 @@ function MainPage() {
     setTaskIdToDelete(null);
     setShowDeleteConfirmation(false);
   };
+
   const handleEditTask = async () => {
-    if (taskIdToEdit !== null) {
+    // Check if either new description or new ingredient is not filled out
+    if (!newDesc || newIngredient === 'Select an Ingredient') {
+      const errorMessage = 'Please fill out both fields.';
+      console.error(errorMessage);
+      setError(errorMessage);
+      return;
+    }
+
+    try {
       await handleEdit(taskIdToEdit, user, newDesc, newIngredient, setTasks);
       setTaskIdToEdit(null);
       setShowEditModal(false);
@@ -96,26 +108,35 @@ function MainPage() {
       setNewIngredient('');
       // Close the dropdown
       setShowDropdown(false);
+    } catch (error) {
+      // Handle errors if needed
+      console.error('Error editing task:', error.message);
+    } finally {
+      // Reset the error message
+      setError('');
     }
   };
-
   const handleEditClick = async (taskId) => {
     setTaskIdToEdit(taskId);
     setShowEditModal(true);
 
     // Fetch the list of ingredients when the Edit Task modal is opened
     try {
+      setLoadingIngredientNames(true); // Set loading state to true while fetching
       const response = await fetch(`${urlBase}/api/getIngredientNames`);
       if (response.ok) {
         const data = await response.json();
-        setIngredients(data);
+        setIngredientNames(data);
       } else {
         console.error('Failed to fetch ingredient names:', response.statusText);
       }
     } catch (error) {
       console.error('Error fetching ingredient names:', error.message);
+    } finally {
+      setLoadingIngredientNames(false); // Set loading state to false when fetching is complete
     }
   };
+
   const handleCreateTask = async () => {
     setShowModalTask(true);
   };
@@ -220,16 +241,18 @@ function MainPage() {
                       type="button"
                       onClick={() => setShowDropdown(!showDropdown)}
                       id="editIngredientButton"
+                      disabled={loadingIngredientNames} // Disable the button when ingredient names are loading
                     >
-                      {newIngredient}
+                      {loadingIngredientNames ? 'Loading...' : newIngredient}
                     </button>
-                    {showDropdown && (
+                    {loadingIngredientNames}
+                    {!loadingIngredientNames && showDropdown && (
                       <CreateDropDown
                         setIngredientHook={(ingredient) => {
                           setNewIngredient(ingredient);
                           setShowDropdown(false); // Close the dropdown when an ingredient is selected
                         }}
-                        ingredientNames={ingredients}
+                        ingredientNames={ingredientNames}
                       />
                     )}
                     <button type="button" onClick={handleEditTask}>
@@ -238,6 +261,7 @@ function MainPage() {
                     <button type="button" onClick={() => setShowEditModal(false)}>
                       Cancel
                     </button>
+                    {error && <p className="error-message">{error}</p>}
                   </div>
                 </div>
               </>
