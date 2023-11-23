@@ -1,24 +1,55 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import axios from 'axios';
 
 const TaskCalendar = () => {
-  // State to store selected date and tasks
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [tasks, setTasks] = useState({});
+    const urlBase = 'http://67.205.172.88:5000';
 
-  // Function to handle date change
+  const location = useLocation();
+  const user = location.state.user;
+
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [tasksByDueDate, setTasksByDueDate] = useState({});
+
+  const fetchUserTasks = async (date) => {
+    try {
+      const username = user.Username;
+      const response = await axios.get(`${urlBase}/api/getUserTasks/${user}`);
+      const tasks = response.data;
+  
+      // Initialize an object to store tasks organized by due date
+      const tasksByDueDate = {};
+  
+      tasks.forEach((task) => {
+        // Ensure the dueDate is a valid date before formatting
+        const dueDate = task.DueDate ? new Date(task.DueDate) : null;
+  
+        if (dueDate instanceof Date && !isNaN(dueDate)) {
+          const formattedDueDate = dueDate.toISOString().split('T')[0];
+  
+          if (!tasksByDueDate[formattedDueDate]) {
+            tasksByDueDate[formattedDueDate] = [];
+          }
+  
+          tasksByDueDate[formattedDueDate].push(task);
+        } else {
+          console.error('Invalid due date for task:', task);
+        }
+      });
+  
+      setTasksByDueDate(tasksByDueDate);
+    } catch (error) {
+      console.error('Error fetching user tasks:', error);
+    }
+  };
+  
+  
+
   const handleDateChange = (date) => {
     setSelectedDate(date);
-  };
-
-  // Function to add a task for the selected date
-  const addTask = (task) => {
-    const formattedDate = selectedDate.toISOString().split('T')[0];
-    setTasks((prevTasks) => ({
-      ...prevTasks,
-      [formattedDate]: [...(prevTasks[formattedDate] || []), task],
-    }));
+    fetchUserTasks(date); // Fetch tasks when the selected date changes
   };
 
   return (
@@ -34,8 +65,8 @@ const TaskCalendar = () => {
           </div>
           <div>
             <ul>
-              {tasks[selectedDate.toISOString().split('T')[0]]?.map((task, index) => (
-                <li key={index}>{task}</li>
+              {tasksByDueDate[selectedDate.toISOString().split('T')[0]]?.map((task) => (
+                <li key={task._id}>{task.Desc}</li>
               ))}
             </ul>
           </div>
@@ -45,8 +76,7 @@ const TaskCalendar = () => {
               placeholder="Add task"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  addTask(e.target.value);
-                  e.target.value = '';
+                  // Implement logic to add a new task for the selected date
                 }
               }}
             />
