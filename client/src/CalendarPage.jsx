@@ -5,10 +5,10 @@ import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 
 const TaskCalendar = () => {
-    const urlBase = 'http://67.205.172.88:5000';
+  const urlBase = 'http://67.205.172.88:5000';
 
   const location = useLocation();
-  const user = location.state?.user || {}; // Make sure to provide a default value
+  const user = location.state?.user || {}; 
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [tasksByDueDate, setTasksByDueDate] = useState([]);
@@ -20,14 +20,12 @@ const TaskCalendar = () => {
         return;
       }
 
-      const username = user.Username;
       const response = await axios.get(`${urlBase}/api/getUserTaskDates/${user}`);
       const tasksByDueDate = response.data;
 
       // Extract tasks for the selected date
       const tasksForSelectedDate = tasksByDueDate[date.toISOString().split('T')[0]] || [];
 
-      // Log tasks for the selected date
       console.log('Tasks for Selected Date:', tasksForSelectedDate);
 
       setTasksByDueDate(tasksForSelectedDate);

@@ -16,6 +16,12 @@ function RegisterMERT() {
       setRegisterNotice(registrationResult);
     }
   };
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault(); 
+      handleRegister();
+    }
+  };
 
   return (
     <>
@@ -23,8 +29,11 @@ function RegisterMERT() {
       <div className="container">
         <div className="register-box">
           <div className="form-title">Sign Up</div>
-          <form id="registerForm" className="register-form">
-            <input className="rounded-pill p-2 mb-4" id="firstname" type="text" placeholder="First Name" required />
+          <form
+            id="registerForm"
+            className="register-form"
+            onKeyDown={handleKeyDown}
+          >            <input className="rounded-pill p-2 mb-4" id="firstname" type="text" placeholder="First Name" required />
             <label className="h5" htmlFor="lastname">Last Name:</label>
             <input className="rounded-pill p-2 mb-4" id="lastname" type="text" placeholder="Last Name" required />
             <label className="h5" htmlFor="username">Username:</label>

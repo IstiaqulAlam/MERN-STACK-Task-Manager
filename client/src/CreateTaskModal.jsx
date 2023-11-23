@@ -3,7 +3,6 @@ import { CreateDropDown } from './dropdown';
 import { TaskList } from './MainPageScript';
 
 const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
-
     const urlBase = 'http://67.205.172.88:5000';
 
     const [showDropdown, setShowDropdown] = useState(false);

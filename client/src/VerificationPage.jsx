@@ -17,14 +17,23 @@ function VerificationPage() {
       setVerificationNotice("Verification code doesn't match. Please try again.");
     }
   };
-
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault(); 
+      handleVerification();
+    }
+  };
   return (
     <>
       <h1>Veggie Tasks - Email Verification</h1>
       <div className="container">
         <div className="verify-box">
           <div className="form-title">Verification</div>
-          <form className="verification-form">
+          <div className="form-title">Verification</div>
+          <form
+            className="verification-form"
+            onKeyDown={handleKeyDown} 
+          >
             <label className="h5" htmlFor="verificationCode">Verification Code:</label>
             <input className="rounded-pill p-2 mb-4" id="verificationCode" type="text" placeholder="Verifican Code:" required />
             <button type="button" onClick={handleVerification} id="verifyButton">Verify</button>

@@ -5,6 +5,8 @@ import { YourIngredients } from './ViewIngredientsModal';
 import { MDBTable, MDBTableHead, MDBTableBody } from 'mdb-react-ui-kit';
 
 function Recipes() {
+  const urlBase = 'http://67.205.172.88:5000';
+
   const location = useLocation();
   const user = location.state?.user;
   const navigate = useNavigate();
@@ -27,7 +29,7 @@ function Recipes() {
   
   const getUserRecipes = async () => {
     try {
-      const response = await fetch(`http://67.205.172.88:5000/api/getUserRecipes/${user}`);
+      const response = await fetch(`${urlBase}/api/getUserRecipes/${user}`);
 
       if (response.ok) {
         const recipes = await response.json();
@@ -42,7 +44,7 @@ function Recipes() {
 
   const redeemRecipe = async (recipeName) => {
     try {
-      const response = await fetch(`http://67.205.172.88:5000/api/redeemRecipe/${user}/${recipeName}`, {
+      const response = await fetch(`${urlBase}/api/redeemRecipe/${user}/${recipeName}`, {
         method: 'POST',
       });
 

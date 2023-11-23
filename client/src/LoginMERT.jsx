@@ -22,15 +22,23 @@ function LoginMERT() {
       setLoginNotice('Login failed. Please check your credentials.');
     }
   };
-
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleLogin();
+    }
+  };
   return (
     <>
       <h1>Veggie Tasks</h1>
       <div className="container">
         <div className="login-box">
           <div className="form-title">Login</div>
-          <form id="loginForm" className="login-form">
-            <input className="rounded-pill p-2 mb-4" id="username" type="text" placeholder="Username" required />
+          <form
+            id="loginForm"
+            className="login-form"
+            onKeyDown={handleKeyPress} 
+          >            <input className="rounded-pill p-2 mb-4" id="username" type="text" placeholder="Username" required />
             <label className="h5" htmlFor="password">Password:</label>
             <input className="rounded-pill p-2 mb-4" id="password" type="password" placeholder="Password" required />
             <button type="button" onClick={handleLogin} id="loginButton">Login</button>
