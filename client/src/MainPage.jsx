@@ -147,6 +147,7 @@ function MainPage() {
         <div className="main-page-box">
           <div className="form-title">Welcome, {user}</div>
           <div className="form-title">Your tasks</div>
+          <div className="task-list-container">
           <form id="mainForm">
             <button
               type="button"
@@ -267,6 +268,7 @@ function MainPage() {
               </>
             )}
           </form>
+          </div>
           <div id="loginNotice"></div>
         </div>
       </div>

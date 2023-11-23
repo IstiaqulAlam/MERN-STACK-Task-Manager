@@ -2,6 +2,7 @@ body {
     background-color: #3498db;
     background-size: 100% auto;
     position: relative;
+    overflow: hidden
 }
 
 h1 {
@@ -243,3 +244,7 @@ dropdownItem {
   z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
   cursor: pointer; /* Add a pointer on hover */
 }
+.task-list-container {
+    height: 700px; /* Adjust the height as needed */
+    overflow-y: auto;
+  }
