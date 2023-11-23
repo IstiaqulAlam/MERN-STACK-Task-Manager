@@ -140,6 +140,12 @@ function MainPage() {
   const handleCreateTask = async () => {
     setShowModalTask(true);
   };
+
+  
+  const handleCalendarClick = () => {
+    // Navigate to the calendar page
+    navigate('/calendar', { state: { user } });
+  };
   return (
     <>
       <h1>Veggie Tasks</h1>
@@ -148,126 +154,144 @@ function MainPage() {
           <div className="form-title">Welcome, {user}</div>
           <div className="form-title">Your tasks</div>
           <div className="task-list-container">
-          <form id="mainForm">
-            <button
-              type="button"
-              className="button_mainpage"
-              onClick={handleCreateTask}
-              id="CreatTaskButton"
-            >
-              Create Task
-            </button>            <button type="button" className="button_mainpage" onClick={() => navigate('/recipes', { state: { user } })} id="ViewRecipesButton">View Recipes</button>
-            <button type="button" className="button_mainpage" onClick={() => setShowModalIngredients(!showModalIngredients)} id="YourIngredientsButton">Your Ingredients</button>
-            {loadingTasks && <p>Loading tasks...</p>}
-            {!loadingTasks && tasks.length === 0 && <p>No tasks available</p>}
-            {!loadingTasks && tasks.map(task => (
-              <div key={task._id}>
-                <p>{`Task: ${task.Desc}, Ingredient: ${task.Ingredient}`}</p>
-                <button
-                  type="button"
-                  className="delete-button"
-                  onClick={() => handleDeleteClick(task._id)}
-                >
-                  Delete
-                </button>
-                <button
-                  type="button"
-                  className="finish-button"
-                  onClick={() => handleFinishTask(task._id, user)}
-                >
-                  Finish
-                </button>
-                <button
-                  type="button"
-                  className="edit-button"
-                  onClick={() => handleEditClick(task._id)}
-                >
-                  Edit
-                </button>
-              </div>
-            ))}
+            <form id="mainForm">
+              <button
+                type="button"
+                className="button_mainpage"
+                onClick={handleCreateTask}
+                id="CreatTaskButton"
+              >
+                Create Task
+              </button>
+              <button
+                type="button"
+                className="button_mainpage"
+                onClick={() => navigate('/recipes', { state: { user } })}
+                id="ViewRecipesButton">View Recipes
+              </button>
+              <button type="button"
+                className="button_mainpage"
+                onClick={() => setShowModalIngredients(!showModalIngredients)}
+                id="YourIngredientsButton">Your Ingredients
+              </button>
+              <button
+                type="button"
+                className="button_mainpage"
+                onClick={handleCalendarClick}
+                id="CalendarButton"
+              >
+                Calendar
+              </button>
+              {loadingTasks && <p>Loading tasks...</p>}
+              {!loadingTasks && tasks.length === 0 && <p>No tasks available</p>}
+              {!loadingTasks && tasks.map(task => (
+                <div key={task._id}>
+                  <p>{`Task: ${task.Desc}, Ingredient: ${task.Ingredient}`}</p>
+                  <button
+                    type="button"
+                    className="delete-button"
+                    onClick={() => handleDeleteClick(task._id)}
+                  >
+                    Delete
+                  </button>
+                  <button
+                    type="button"
+                    className="finish-button"
+                    onClick={() => handleFinishTask(task._id, user)}
+                  >
+                    Finish
+                  </button>
+                  <button
+                    type="button"
+                    className="edit-button"
+                    onClick={() => handleEditClick(task._id)}
+                  >
+                    Edit
+                  </button>
+                </div>
+              ))}
 
-            {showDeleteConfirmation && (
-              <>
-                <div id="overlay" onClick={handleCancelDelete}></div>
-                <div className="modalContainer">
-                  <div className="modalBox">
-                    <p>Are you sure you want to delete this task?</p>
-                    <button type="button" onClick={handleConfirmDelete}>Yes</button>
-                    <button type="button" onClick={handleCancelDelete}>No</button>
+              {showDeleteConfirmation && (
+                <>
+                  <div id="overlay" onClick={handleCancelDelete}></div>
+                  <div className="modalContainer">
+                    <div className="modalBox">
+                      <p>Are you sure you want to delete this task?</p>
+                      <button type="button" onClick={handleConfirmDelete}>Yes</button>
+                      <button type="button" onClick={handleCancelDelete}>No</button>
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
-            {showModalTask && (
-              <CreateTaskModal
-                username={user}
-                setTasks={setTasks}
-                setShowModalTask={setShowModalTask}
-              />
-            )}
-            {showModalTask ? <div id="overlay" onClick={() => setShowModalTask(false)}></div> : undefined}
-            {loadingIngredients && <p>Loading ingredients...</p>}
-            {!loadingIngredients && showModalIngredients && (
-              <>
-                <div id="overlay" onClick={() => setShowModalIngredients(false)}></div>
-                <div className="modalContainer">
-                  <div className="modalBox">
-                    <p>Your Ingredients</p>
-                    <ul>
-                      {ingredients.map((ingredient, index) => (
-                        <li key={index}>{ingredient}</li>
-                      ))}
-                    </ul>
+                </>
+              )}
+              {showModalTask && (
+                <CreateTaskModal
+                  username={user}
+                  setTasks={setTasks}
+                  setShowModalTask={setShowModalTask}
+                />
+              )}
+              {showModalTask ? <div id="overlay" onClick={() => setShowModalTask(false)}></div> : undefined}
+              {loadingIngredients && <p>Loading ingredients...</p>}
+              {!loadingIngredients && showModalIngredients && (
+                <>
+                  <div id="overlay" onClick={() => setShowModalIngredients(false)}></div>
+                  <div className="modalContainer">
+                    <div className="modalBox">
+                      <p>Your Ingredients</p>
+                      <ul>
+                        {ingredients.map((ingredient, index) => (
+                          <li key={index}>{ingredient}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
-            {showEditModal && (
-              <>
-                <div id="overlay" onClick={() => setShowEditModal(false)}></div>
-                <div className="modalContainer">
-                  <div className="modalBox">
-                    <p>Edit Task</p>
-                    <label htmlFor="editDesc">New Description:</label>
-                    <input
-                      type="text"
-                      id="editDesc"
-                      value={newDesc}
-                      onChange={(e) => setNewDesc(e.target.value)}
-                    />
-                    <label htmlFor="editIngredient">New Ingredient:</label>
-                    {/* Convert the ingredient input to a dropdown */}
-                    <button
-                      type="button"
-                      onClick={() => setShowDropdown(!showDropdown)}
-                      id="editIngredientButton"
-                      disabled={loadingIngredientNames} // Disable the button when ingredient names are loading
-                    >
-                      {loadingIngredientNames ? 'Loading...' : newIngredient}
-                    </button>
-                    {loadingIngredientNames}
-                    {!loadingIngredientNames && showDropdown && (
-                      <CreateDropDown
-                        setIngredientHook={(ingredient) => {
-                          setNewIngredient(ingredient);
-                          setShowDropdown(false); // Close the dropdown when an ingredient is selected
-                        }}
-                        ingredientNames={ingredientNames}
+                </>
+              )}
+              {showEditModal && (
+                <>
+                  <div id="overlay" onClick={() => setShowEditModal(false)}></div>
+                  <div className="modalContainer">
+                    <div className="modalBox">
+                      <p>Edit Task</p>
+                      <label htmlFor="editDesc">New Description:</label>
+                      <input
+                        type="text"
+                        id="editDesc"
+                        value={newDesc}
+                        onChange={(e) => setNewDesc(e.target.value)}
                       />
-                    )}
-                    <button type="button" onClick={handleEditTask}>
-                      Save
-                    </button>
-                    <button type="button" onClick={() => setShowEditModal(false)}>
-                      Cancel
-                    </button>
-                    {error && <p className="error-message">{error}</p>}
+                      <label htmlFor="editIngredient">New Ingredient:</label>
+                      {/* Convert the ingredient input to a dropdown */}
+                      <button
+                        type="button"
+                        onClick={() => setShowDropdown(!showDropdown)}
+                        id="editIngredientButton"
+                        disabled={loadingIngredientNames} // Disable the button when ingredient names are loading
+                      >
+                        {loadingIngredientNames ? 'Loading...' : newIngredient}
+                      </button>
+                      {loadingIngredientNames}
+                      {!loadingIngredientNames && showDropdown && (
+                        <CreateDropDown
+                          setIngredientHook={(ingredient) => {
+                            setNewIngredient(ingredient);
+                            setShowDropdown(false); // Close the dropdown when an ingredient is selected
+                          }}
+                          ingredientNames={ingredientNames}
+                        />
+                      )}
+                      <button type="button" onClick={handleEditTask}>
+                        Save
+                      </button>
+                      <button type="button" onClick={() => setShowEditModal(false)}>
+                        Cancel
+                      </button>
+                      {error && <p className="error-message">{error}</p>}
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
-          </form>
+                </>
+              )}
+            </form>
           </div>
           <div id="loginNotice"></div>
         </div>

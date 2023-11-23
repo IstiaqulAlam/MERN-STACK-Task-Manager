@@ -5,6 +5,7 @@ import RegisterMERT from './RegisterMERT';
 import MainPage from './MainPage';
 import Recipes from './Recipes';
 import VerificationPage from './VerificationPage'; 
+import CalendarPage from './CalendarPage';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/mainpage" element={<MainPage />} />
         <Route path="/recipes" element={<Recipes />} />
         <Route path="/verify" element={<VerificationPage />} /> 
+        <Route path="/calendar" element={<CalendarPage />} /> 
       </Routes>
     </Router>
   );
