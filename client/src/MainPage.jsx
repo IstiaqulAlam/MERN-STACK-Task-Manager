@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './styles.css';
-import { TaskList, handleDelete, handleFinish } from './MainPageScript';
+import { TaskList, handleDelete, handleFinish, handleEdit } from './MainPageScript';
 import { CreateTaskModal } from './CreateTaskModal';
 import { YourIngredients } from './ViewIngredientsModal';
 import { loginWithStoredCredentials } from './AutoLogin';
+import { CreateDropDown } from './dropdown';
 
 function MainPage() {
+  const urlBase = 'http://67.205.172.88:5000';
+
   const [tasks, setTasks] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [showModalTask, setShowModalTask] = useState(false);
@@ -15,6 +18,11 @@ function MainPage() {
   const [loadingIngredients, setLoadingIngredients] = useState(true);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [taskIdToDelete, setTaskIdToDelete] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [taskIdToEdit, setTaskIdToEdit] = useState(null);
+  const [newDesc, setNewDesc] = useState('');
+  const [newIngredient, setNewIngredient] = useState('Select an Ingredient'); // Set default text
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const location = useLocation();
   const user = location.state?.user;
@@ -54,24 +62,63 @@ function MainPage() {
 
   const navigate = useNavigate();
 
-  const handleDeleteClick = (taskId) => {
+  const handleDeleteClick = async (taskId) => {
     setTaskIdToDelete(taskId);
     setShowDeleteConfirmation(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (taskIdToDelete !== null) {
-      handleDelete(taskIdToDelete, user);
+      await handleDelete(taskIdToDelete, user, setTasks);
       setTaskIdToDelete(null);
       setShowDeleteConfirmation(false);
     }
+  };
+
+  const handleFinishTask = async (taskId) => {
+    await handleFinish(taskId, user, setTasks);
+    // Fetch the updated user's ingredients list and update the state
+    const updatedIngredients = await YourIngredients(user);
+    setIngredients(updatedIngredients);
   };
 
   const handleCancelDelete = () => {
     setTaskIdToDelete(null);
     setShowDeleteConfirmation(false);
   };
+  const handleEditTask = async () => {
+    if (taskIdToEdit !== null) {
+      await handleEdit(taskIdToEdit, user, newDesc, newIngredient, setTasks);
+      setTaskIdToEdit(null);
+      setShowEditModal(false);
+      // Optionally, clear the input fields
+      setNewDesc('');
+      setNewIngredient('');
+      // Close the dropdown
+      setShowDropdown(false);
+    }
+  };
 
+  const handleEditClick = async (taskId) => {
+    setTaskIdToEdit(taskId);
+    setShowEditModal(true);
+
+    // Fetch the list of ingredients when the Edit Task modal is opened
+    try {
+      const response = await fetch(`${urlBase}/api/getIngredientNames`);
+      if (response.ok) {
+        const data = await response.json();
+        setIngredients(data);
+      } else {
+        console.error('Failed to fetch ingredient names:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching ingredient names:', error.message);
+    }
+  };
+  const handleCreateTask = async () => {
+    setShowModalTask(true);
+  };
   return (
     <>
       <h1>Veggie Tasks</h1>
@@ -80,8 +127,14 @@ function MainPage() {
           <div className="form-title">Welcome, {user}</div>
           <div className="form-title">Your tasks</div>
           <form id="mainForm">
-            <button type="button" className="button_mainpage" onClick={() => setShowModalTask(!showModalTask)} id="CreatTaskButton">Create Task</button>
-            <button type="button" className="button_mainpage" onClick={() => navigate('/recipes', { state: { user } })} id="ViewRecipesButton">View Recipes</button>
+            <button
+              type="button"
+              className="button_mainpage"
+              onClick={handleCreateTask}
+              id="CreatTaskButton"
+            >
+              Create Task
+            </button>            <button type="button" className="button_mainpage" onClick={() => navigate('/recipes', { state: { user } })} id="ViewRecipesButton">View Recipes</button>
             <button type="button" className="button_mainpage" onClick={() => setShowModalIngredients(!showModalIngredients)} id="YourIngredientsButton">Your Ingredients</button>
             {loadingTasks && <p>Loading tasks...</p>}
             {!loadingTasks && tasks.length === 0 && <p>No tasks available</p>}
@@ -98,9 +151,16 @@ function MainPage() {
                 <button
                   type="button"
                   className="finish-button"
-                  onClick={() => handleFinish(task._id, user)}
+                  onClick={() => handleFinishTask(task._id, user)}
                 >
                   Finish
+                </button>
+                <button
+                  type="button"
+                  className="edit-button"
+                  onClick={() => handleEditClick(task._id)}
+                >
+                  Edit
                 </button>
               </div>
             ))}
@@ -117,11 +177,18 @@ function MainPage() {
                 </div>
               </>
             )}
-            {showModalTask ? <CreateTaskModal username={user} /> : undefined}
+            {showModalTask && (
+              <CreateTaskModal
+                username={user}
+                setTasks={setTasks}
+                setShowModalTask={setShowModalTask}
+              />
+            )}
             {showModalTask ? <div id="overlay" onClick={() => setShowModalTask(false)}></div> : undefined}
             {loadingIngredients && <p>Loading ingredients...</p>}
             {!loadingIngredients && showModalIngredients && (
               <>
+                <div id="overlay" onClick={() => setShowModalIngredients(false)}></div>
                 <div className="modalContainer">
                   <div className="modalBox">
                     <p>Your Ingredients</p>
@@ -134,7 +201,47 @@ function MainPage() {
                 </div>
               </>
             )}
-            {!loadingIngredients && showModalIngredients && <div id="overlay" onClick={() => setShowModalIngredients(false)}></div>}
+            {showEditModal && (
+              <>
+                <div id="overlay" onClick={() => setShowEditModal(false)}></div>
+                <div className="modalContainer">
+                  <div className="modalBox">
+                    <p>Edit Task</p>
+                    <label htmlFor="editDesc">New Description:</label>
+                    <input
+                      type="text"
+                      id="editDesc"
+                      value={newDesc}
+                      onChange={(e) => setNewDesc(e.target.value)}
+                    />
+                    <label htmlFor="editIngredient">New Ingredient:</label>
+                    {/* Convert the ingredient input to a dropdown */}
+                    <button
+                      type="button"
+                      onClick={() => setShowDropdown(!showDropdown)}
+                      id="editIngredientButton"
+                    >
+                      {newIngredient}
+                    </button>
+                    {showDropdown && (
+                      <CreateDropDown
+                        setIngredientHook={(ingredient) => {
+                          setNewIngredient(ingredient);
+                          setShowDropdown(false); // Close the dropdown when an ingredient is selected
+                        }}
+                        ingredientNames={ingredients}
+                      />
+                    )}
+                    <button type="button" onClick={handleEditTask}>
+                      Save
+                    </button>
+                    <button type="button" onClick={() => setShowEditModal(false)}>
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </form>
           <div id="loginNotice"></div>
         </div>

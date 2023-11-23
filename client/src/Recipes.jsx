@@ -48,7 +48,8 @@ function Recipes() {
 
       if (response.ok) {
         console.log(`Recipe ${recipeName} redeemed successfully!`);
-        window.location.reload(true);
+        getUserRecipes();
+        getIngredients();
       } else {
         console.error('Failed to redeem recipe:', response.status, response.statusText);
       }

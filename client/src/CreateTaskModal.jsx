@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { CreateDropDown } from './dropdown';
+import { TaskList } from './MainPageScript';
 
-const CreateTaskModal = ({ username }) => {
+const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
 
     const urlBase = 'http://67.205.172.88:5000';
 
@@ -53,7 +54,11 @@ const CreateTaskModal = ({ username }) => {
             });
             if (response.ok) {
                 console.log('Task created successfully');
-                window.location.reload(true);
+                // Fetch the updated task list and update the state
+                const updatedTasks = await TaskList(username);
+                setTasks(updatedTasks);
+                setShowModalTask(false);
+
             } else {
                 console.error('Failed to create task:', response.statusText);
             }
