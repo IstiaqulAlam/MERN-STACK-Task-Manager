@@ -36,6 +36,7 @@ function LoginMERT() {
             <button type="button" onClick={handleLogin} id="loginButton">Login</button>
             <p id="loginNotice">{loginNotice}</p>
             <Link to="/register" id="registerRedirectButton">Register</Link>
+            <Link to="/resetpassword" id="resetpasswordbutton">Reset Password</Link>
           </form>
           <div id="loginNotice"></div>
         </div>
