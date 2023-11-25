@@ -102,7 +102,7 @@ router.post('/register', async (req, res, next) => {
     };
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
-        res.status(500).json({ err: 'Email sending failed' });
+        console.log(error);
         return;
       } else {
         console.log('Email sent:', info.response);
@@ -229,7 +229,9 @@ router.post('/createTask', async (req, res, next) => {
       _id: id,
       User: req.body.username,
       Desc: req.body.desc,
-      Ingredient: req.body.ingredient
+      Ingredient: req.body.ingredient,
+      DueDate: new Date(req.body.dueDate),
+      EffortPoints: parseInt(req.body.effortPoints)
     });
 
     // Take in the user ID from the request (assuming you have it in req.body.userId)
@@ -674,6 +676,170 @@ router.put('/editTask/:taskId', async (req, res, next) => {
     );
 
     res.json({ msg: "Task edited successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+});
+
+router.post('/resetPasswordRequest', async (req, res, next) => {
+  const client = await MongoClient.connect(process.env.DB);
+  const database = client.db('COP4331');
+  const collection = database.collection('Users');
+  const collectionResets = database.collection('Reset Codes');
+  try {
+    const existingUserByEmail = await collection.findOne({ Email: req.body.email });
+
+    if (!existingUserByEmail) {
+      res.status(500).json({
+        err: "Email is not registered. Please use a different email address."
+      });
+      return;
+    }
+
+    // Generate a verification code
+    const verificationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.zoho.com',
+        port: 465,
+        secure: true,
+      auth: {
+          user: 'nodemailer123321@zohomail.com',
+          pass: process.env.EMAILPWD,
+        },
+    });
+
+    await collectionResets.insertOne({
+      RestoreID: verificationCode,
+      Email: req.body.email,
+    });
+
+    // Send verification code via email
+    const mailOptions = {
+      from: 'nodemailer123321@zohomail.com',
+      to: req.body.email,
+      subject: 'Veggie Tasks Verification Code',
+      text: "To reset your password insert this code: " + verificationCode,
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        res.status(500).json({ err: 'Email sending failed' });
+        return;
+      } else {
+        console.log('Email sent:', info.response);
+      }
+    });
+
+    res.json({
+      success: true,
+      message: "Check your email for verification code."
+    });
+
+  } catch (error) {
+    console.error("Error during registration:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    client.close();
+  }
+});
+
+router.post('/allowPasswordChange', async (req, res, next) => {
+  const client = await MongoClient.connect(process.env.DB);
+  const database = client.db('COP4331');
+  const usersCollection = database.collection('Users');
+  const collectionResets = database.collection('Reset Codes');
+  const existingUser = await collectionResets.findOne({ RestoreID: req.body.restoreid });
+  if (!existingUser)
+  {
+    res.status(500).json({ error: "Verification code not found" });
+    return;
+  }
+  await usersCollection.updateOne(
+      { Email: existingUser.Email },
+      {
+        $set: {
+          PasswordChangeable: true
+        }
+      }
+    );
+
+  user = await usersCollection.findOne({ Email: existingUser.Email });
+  res.json({ msg: "May change password", user });
+});
+
+router.post('/changePassword', async (req, res, next) => {
+  const client = await MongoClient.connect(process.env.DB);
+  const database = client.db('COP4331');
+  const usersCollection = database.collection('Users');
+  const user = await usersCollection.findOne({ _id: new ObjectId(req.body._id) })
+  if (!user.PasswordChangeable)
+  {
+    res.status(500).json({ msg: "Cannot change password" });
+    return;
+  }
+  await usersCollection.updateOne(
+      { _id: new ObjectId(req.body._id) },
+      {
+        $set: {
+          Password: req.body.password,
+          PasswordChangeable: false
+        }
+      }
+    );
+  res.json({ msg: "Password Changed" });
+});
+
+router.get('/searchTaskByName/:username/:taskName', async (req, res, next) => {
+  const username = req.params.username; // Extract the username from the request parameters
+  const taskName = req.params.taskName; // Extract the task name from the request parameters
+
+  const client = await MongoClient.connect(process.env.DB);
+  const database = client.db('COP4331');
+  const tasksCollection = database.collection('Tasks');
+
+  try {
+    // Use a regular expression for a case-insensitive partial match search
+    const regex = new RegExp(taskName, 'i');
+
+    // Search for the task documents with names that partially match the provided name and belong to the specified username
+    const matchingTasks = await tasksCollection.find({ User: username, Desc: { $regex: regex } }).toArray();
+
+    if (matchingTasks.length === 0) {
+      res.status(404).json({ msg: "No matching tasks found for the specified username and task name" });
+      return;
+    }
+
+    // Return the found task documents
+    res.json(matchingTasks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  } finally {
+    await client.close();
+  }
+});
+
+router.get('/searchTaskByDueDate/:username/:dueDate', async (req, res, next) => {
+  const username = req.params.username; // Extract the username from the request parameters
+  const dueDate = req.params.dueDate; // Extract the due date from the request parameters
+
+  const client = await MongoClient.connect(process.env.DB);
+  const database = client.db('COP4331');
+  const tasksCollection = database.collection('Tasks');
+
+  try {
+    // Search for the task documents with due dates that match the provided due date and belong to the specified username
+    const matchingTasks = await tasksCollection.find({ User: username, DueDate: dueDate }).toArray();
+
+    if (matchingTasks.length === 0) {
+      res.status(404).json({ msg: "No matching tasks found for the specified username and due date" });
+      return;
+    }
+
+    // Return the found task documents
+    res.json(matchingTasks);
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Internal server error" });
