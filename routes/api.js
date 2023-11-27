@@ -123,7 +123,8 @@ router.post('/register', async (req, res, next) => {
       Email: req.body.email,
       Recipes: [],
       Tasks: [],
-      VerifyCode: verificationCode
+      VerifyCode: verificationCode,
+      PasswordChangeable: false
     });
 
     res.json({
