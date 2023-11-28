@@ -516,6 +516,7 @@ router.get('/getUserTasks/:username', async (req, res, next) => {
     await client.close();
   }
 });
+
 router.get('/getUserTaskDates/:username', async (req, res, next) => {
   const username = req.params.username;
 
@@ -552,7 +553,13 @@ router.get('/getUserTaskDates/:username', async (req, res, next) => {
           userTasksByDueDate[dueDate] = [];
         }
 
-        userTasksByDueDate[dueDate].push(task);
+        userTasksByDueDate[dueDate].push({
+          _id: task._id,
+          Desc: task.Desc,
+          Ingredient: task.Ingredient,
+          DueDate: task.DueDate,
+          EffortPoints: task.EffortPoints,
+        });
       }
     }
 
@@ -564,6 +571,7 @@ router.get('/getUserTaskDates/:username', async (req, res, next) => {
     await client.close();
   }
 });
+
 router.post('/redeemRecipe/:username/:recipeName', async (req, res, next) => {
   const username = req.params.username; // Extract the user ID from the request parameters
   const recipeName = req.params.recipeName; // Extract the recipe name from the request parameters

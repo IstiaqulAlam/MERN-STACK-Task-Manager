@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { CreateDropDown } from './dropdown';
 import { TaskList } from './MainPageScript';
 
@@ -7,10 +9,13 @@ const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
 
     const [showDropdown, setShowDropdown] = useState(false);
     const [pickedIngredient, setPickedIngredient] = useState("Pick an Ingredient");
+    const [dueDate, setDueDate] = useState(null);
+    const [effortPoints, setEffortPoints] = useState("");
     const [taskName, setTaskName] = useState("");
     const [ingredientNames, setIngredientNames] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const effortPointOptions = [1, 2, 3, 4, 5, 6];
 
     const fetchIngredientNames = async () => {
         if (ingredientNames.length === 0) {
@@ -39,13 +44,13 @@ const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
     const handleSubmit = async () => {
         console.log('Handling submit...');
 
-        // Check if either task name or picked ingredient is not filled out
-        if (!taskName || pickedIngredient === 'Pick an Ingredient') {
-            const errorMessage = 'Please fill out both fields.';
-            console.error('Please fill out both fields.');
-            setError(errorMessage);
-            return;
-        }
+// Check if any of the required fields are not filled out
+if (!taskName || pickedIngredient === 'Pick an Ingredient' || !dueDate || !effortPoints) {
+    const errorMessage = 'Please fill out all required fields.';
+    console.error(errorMessage);
+    setError(errorMessage);
+    return;
+}
 
         setLoading(true);
         try {
@@ -59,6 +64,8 @@ const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
                     username: username,
                     desc: taskName,
                     ingredient: pickedIngredient,
+                    dueDate: dueDate,
+                    effortPoints: effortPoints,
                 }),
             });
             if (response.ok) {
@@ -80,6 +87,8 @@ const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
         // Reset the form if needed
         setTaskName('');
         setPickedIngredient('Pick an Ingredient');
+        setDueDate(null);
+        setEffortPoints('');
     };
 
     return (
@@ -95,6 +104,41 @@ const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
                         value={taskName}
                         onChange={(e) => setTaskName(e.target.value)}
                     />
+                    <div className="datepicker-container">
+                        <DatePicker
+                            selected={dueDate}
+                            onChange={(date) => setDueDate(date)}
+                            customInput={<DateButton />}
+                            dateFormat="MMMM d, yyyy"
+                            popperPlacement="bottom-start"
+                        />
+                    </div>
+                    <div className="datepicker-container">
+                        <DatePicker
+                            selected={dueDate}
+                            onChange={(date) => setDueDate(date)}
+                            customInput={<DateButton2 />} // Custom button
+                            dateFormat="h:mm aa" // Display both date and time
+                            showTimeSelect // Show the time input
+                            showTimeSelectOnly // Hide the date input
+                            timeIntervals={15} // Set time intervals (in minutes)
+                            timeCaption="Time" // Text for the time input label
+                            placeholderText="Select Due Date and Time"
+                            popperPlacement="bottom-start" // Align pop-up to bottom-left
+                        />
+                    </div>
+                    <select
+                        id="effortPoints"
+                        value={effortPoints}
+                        onChange={(e) => setEffortPoints(e.target.value)}
+                    >
+                        <option value="">Select Effort Points</option>
+                        {effortPointOptions.map((option) => (
+                            <option key={option} value={option}>
+                                {option}
+                            </option>
+                        ))}
+                    </select>
                     <button
                         type="button"
                         onClick={() => setShowDropdown(!showDropdown)}
@@ -111,6 +155,21 @@ const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
             </div>
         </>
     );
+
 };
 
+const DateButton = ({ value, onClick }) => (
+    <div className="date-button-container">
+        <button type="button" className="date-button" onClick={onClick}>
+            {value || 'Select Due Date'}
+        </button>
+    </div>
+);
+const DateButton2 = ({ value, onClick }) => (
+    <div className="date-button-container">
+        <button type="button" className="date-button" onClick={onClick}>
+            {value || 'Select Time'}
+        </button>
+    </div>
+);
 export { CreateTaskModal };

@@ -6,6 +6,7 @@ import { CreateTaskModal } from './CreateTaskModal';
 import { YourIngredients } from './ViewIngredientsModal';
 import { loginWithStoredCredentials } from './AutoLogin';
 import { CreateDropDown } from './dropdown';
+import DropdownOptions from './DropdownOptions';
 
 function MainPage() {
   const urlBase = 'http://67.205.172.88:5000';
@@ -26,6 +27,8 @@ function MainPage() {
   const [error, setError] = useState('');
   const [loadingIngredientNames, setLoadingIngredientNames] = useState(true);
   const [ingredientNames, setIngredientNames] = useState([]);
+
+  const [taskDropdowns, setTaskDropdowns] = useState({});
 
   const location = useLocation();
   const user = location.state?.user;
@@ -65,7 +68,8 @@ function MainPage() {
 
   const navigate = useNavigate();
 
-  const handleDeleteClick = async (taskId) => {
+  const handleDeleteClick = async (taskId, e) => {
+    e.preventDefault();
     setTaskIdToDelete(taskId);
     setShowDeleteConfirmation(true);
   };
@@ -78,7 +82,8 @@ function MainPage() {
     }
   };
 
-  const handleFinishTask = async (taskId) => {
+  const handleFinishTask = async (taskId, e) => {
+    e.preventDefault();
     await handleFinish(taskId, user, setTasks);
     // Fetch the updated user's ingredients list and update the state
     const updatedIngredients = await YourIngredients(user);
@@ -116,7 +121,8 @@ function MainPage() {
       setError('');
     }
   };
-  const handleEditClick = async (taskId) => {
+  const handleEditClick = async (taskId, e) => {
+    e.preventDefault();
     setTaskIdToEdit(taskId);
     setShowEditModal(true);
 
@@ -141,7 +147,7 @@ function MainPage() {
     setShowModalTask(true);
   };
 
-  
+
   const handleCalendarClick = () => {
     // Navigate to the calendar page
     navigate('/calendar', { state: { user } });
@@ -184,32 +190,34 @@ function MainPage() {
               </button>
               {loadingTasks && <p>Loading tasks...</p>}
               {!loadingTasks && tasks.length === 0 && <p>No tasks available</p>}
-              {!loadingTasks && tasks.map(task => (
-                <div key={task._id}>
-                  <p>{`Task: ${task.Desc}, Ingredient: ${task.Ingredient}`}</p>
-                  <button
-                    type="button"
-                    className="delete-button"
-                    onClick={() => handleDeleteClick(task._id)}
-                  >
-                    Delete
-                  </button>
-                  <button
-                    type="button"
-                    className="finish-button"
-                    onClick={() => handleFinishTask(task._id, user)}
-                  >
-                    Finish
-                  </button>
-                  <button
-                    type="button"
-                    className="edit-button"
-                    onClick={() => handleEditClick(task._id)}
-                  >
-                    Edit
-                  </button>
-                </div>
-              ))}
+              {!loadingTasks &&
+        tasks.map((task) => (
+          <div key={task._id} className="task-container">
+            <p>{`Task: ${task.Desc}, 
+                Ingredient: ${task.Ingredient}, 
+                Due Date: ${formatDate(task.DueDate)},
+                Effort Points: ${task.EffortPoints}`}</p>
+            <button
+              type="button"
+              className="dropdown-button"
+              onClick={() =>
+                setTaskDropdowns((prevDropdowns) => ({
+                  ...prevDropdowns,
+                  [task._id]: !prevDropdowns[task._id],
+                }))
+              }
+            >
+              Options
+            </button>
+            {taskDropdowns[task._id] && (
+              <DropdownOptions
+              onDelete={(e) => handleDeleteClick(task._id, e)}
+              onFinish={(e) => handleFinishTask(task._id, e)}
+              onEdit={(e) => handleEditClick(task._id, e)}
+              />
+            )}
+          </div>
+        ))}
 
               {showDeleteConfirmation && (
                 <>
@@ -302,6 +310,19 @@ function MainPage() {
       <script src="LoginScript.js"></script>
     </>
   );
+  function formatDate(dateString) {
+    const options = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: true, // Use 12-hour clock format
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  }
+
 }
 
 export default MainPage;
