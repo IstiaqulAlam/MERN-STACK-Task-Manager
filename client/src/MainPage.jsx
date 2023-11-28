@@ -33,6 +33,9 @@ function MainPage() {
   const location = useLocation();
   const user = location.state?.user;
 
+  const [searchName, setSearchName] = useState('');
+  const [searchDueDate, setSearchDueDate] = useState('');
+
   const getTasks = async () => {
     try {
       loginWithStoredCredentials();
@@ -152,13 +155,44 @@ function MainPage() {
     // Navigate to the calendar page
     navigate('/calendar', { state: { user } });
   };
+  
+
+  const handleSearchByName = async () => {
+    if (searchName.trim() === '') {
+      // If searchName is empty, fetch the unfiltered list of tasks
+      await getTasks();
+    } else {
+      // Filter tasks based on the searchName
+      const filteredTasks = tasks.filter((task) =>
+        task.Desc.toLowerCase().includes(searchName.toLowerCase())
+      );
+
+      setTasks(filteredTasks);
+    }
+  };
+
+  const handleSearchByDueDate = async () => {
+    if (searchDueDate.trim() === '') {
+      // If searchDueDate is empty, fetch the unfiltered list of tasks
+      await getTasks();
+    } else {
+      // Filter tasks based on the searchDueDate
+      const filteredTasks = tasks.filter((task) => {
+        // Convert task's due date to the same format as the searchDueDate
+        const taskDueDate = new Date(task.DueDate).toISOString().split('T')[0];
+        return taskDueDate === searchDueDate;
+      });
+
+      setTasks(filteredTasks);
+    }
+  };
+
   return (
     <>
       <h1>Veggie Tasks</h1>
       <div className="container">
         <div className="main-page-box">
           <div className="form-title">Welcome, {user}</div>
-          <div className="form-title">Your tasks</div>
           <div className="task-list-container">
             <form id="mainForm">
               <button
@@ -188,36 +222,65 @@ function MainPage() {
               >
                 Calendar
               </button>
+              <div className="search-container">
+
+              <div className="form-title">Search tasks</div>
+
+        <input
+          type="text"
+          placeholder="Search by Task Name"
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+        />
+        <button type="button" onClick={handleSearchByName}>
+          Search by Name
+        </button>
+
+        <input
+          type="date"
+          placeholder="Search by Due Date"
+          value={searchDueDate}
+          onChange={(e) => setSearchDueDate(e.target.value)}
+        />
+        <button type="button" onClick={handleSearchByDueDate}>
+          Search by Due Date
+        </button>
+        <button type="button" onClick={getTasks}>
+          Clear Search
+        </button>
+      </div>
+      <div className="form-title">Your tasks</div>
+
               {loadingTasks && <p>Loading tasks...</p>}
               {!loadingTasks && tasks.length === 0 && <p>No tasks available</p>}
               {!loadingTasks &&
-        tasks.map((task) => (
-          <div key={task._id} className="task-container">
-            <p>{`Task: ${task.Desc}, 
+                tasks.map((task) => (
+                  <div key={task._id} className="task-container">
+                    <p>{`Task: ${task.Desc}, 
                 Ingredient: ${task.Ingredient}, 
                 Due Date: ${formatDate(task.DueDate)},
                 Effort Points: ${task.EffortPoints}`}</p>
-            <button
-              type="button"
-              className="dropdown-button"
-              onClick={() =>
-                setTaskDropdowns((prevDropdowns) => ({
-                  ...prevDropdowns,
-                  [task._id]: !prevDropdowns[task._id],
-                }))
-              }
-            >
-              Options
-            </button>
-            {taskDropdowns[task._id] && (
-              <DropdownOptions
-              onDelete={(e) => handleDeleteClick(task._id, e)}
-              onFinish={(e) => handleFinishTask(task._id, e)}
-              onEdit={(e) => handleEditClick(task._id, e)}
-              />
-            )}
-          </div>
-        ))}
+                    <button
+                      type="button"
+                      className="dropdown-button"
+                      onClick={() =>
+                        setTaskDropdowns((prevDropdowns) => ({
+                          ...prevDropdowns,
+                          [task._id]: !prevDropdowns[task._id],
+                        }))
+                      }
+                    >
+                      Options
+                    </button>
+                    {taskDropdowns[task._id] && (
+                      <DropdownOptions
+                        onDelete={(e) => handleDeleteClick(task._id, e)}
+                        onFinish={(e) => handleFinishTask(task._id, e)}
+                        onEdit={(e) => handleEditClick(task._id, e)}
+                      />
+                    )}
+                  </div>
+                ))}
 
               {showDeleteConfirmation && (
                 <>
