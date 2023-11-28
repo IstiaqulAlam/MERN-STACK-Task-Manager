@@ -158,18 +158,26 @@ function MainPage() {
   
 
   const handleSearchByName = async () => {
-    if (searchName.trim() === '') {
-      // If searchName is empty, fetch the unfiltered list of tasks
-      await getTasks();
-    } else {
-      // Filter tasks based on the searchName
-      const filteredTasks = tasks.filter((task) =>
-        task.Desc.toLowerCase().includes(searchName.toLowerCase())
-      );
-
-      setTasks(filteredTasks);
+    try {
+      loginWithStoredCredentials();
+      if (user) {
+        if (searchName.trim() === '') {
+          // If searchName is empty, fetch the unfiltered list of tasks
+          await getTasks();
+        } else {
+          // Fetch tasks based on the searchName
+          const taskData = await TaskList(user);
+          const filteredTasks = taskData.filter((task) =>
+            task.Desc.toLowerCase().includes(searchName.toLowerCase())
+          );
+          setTasks(filteredTasks);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching tasks:', error.message);
     }
   };
+  
 
   const handleSearchByDueDate = async () => {
     if (searchDueDate.trim() === '') {
