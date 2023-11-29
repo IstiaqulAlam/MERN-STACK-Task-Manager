@@ -37,6 +37,12 @@ table {
     padding: 2em;
     width: 100%;
     position: relative;
+
+}
+
+.tableDiv   {
+    height: 550px;
+    overflow-y: auto;
 }
 
 .container {
@@ -249,7 +255,6 @@ dropdownItem {
 
 .task-list-container {
     height: 700px;
-    overflow-y: auto;
 }
 .date-button-container {
     display: flex;
@@ -269,7 +274,7 @@ dropdownItem {
     z-index: 2;
   }
   
-  .modal-box {
+.modal-box {
     background-color: #fff;
     padding: 2em;
     border-radius: 10px;
@@ -277,6 +282,15 @@ dropdownItem {
     text-align: center;
     color: black;
     z-index: 3;
-  }
+}
+
+.button_search {
+    margin-right: 30px;
+    padding: 0.5em;
+    width: calc(3%);
+    box-sizing: border-box;
+    border: none;
+}
+
 
   
