@@ -274,7 +274,8 @@ function MainPage() {
                 </button>
               </div>
               <div className="form-title">Your tasks</div>
-
+              {loadingTasks && <p>Loading tasks...</p>}
+              {!loadingTasks && tasks.length === 0 && <p>No tasks available</p>}
               {!loadingTasks && (
                 <table>
                   <thead>
@@ -282,7 +283,6 @@ function MainPage() {
                       <th>Task name</th>
                       <th>Ingredient</th>
                       <th>Due Date</th>
-                      <th>Due Time</th>
                       <th>Effort Points</th>
                       <th>Edit</th>
                       <th>Finish</th>
@@ -295,7 +295,6 @@ function MainPage() {
                         <td>{task.Desc}</td>
                         <td>{task.Ingredient}</td>
                         <td>{formatDate(task.DueDate)}</td>
-                        <td>{new Date(task.DueDate).toLocaleTimeString()}</td>
                         <td>{task.EffortPoints}</td>
                         <td>
                           <button type="button" onClick={(e) => handleEditClick(task._id, e)}>

@@ -215,7 +215,6 @@ const TaskCalendar = () => {
                     onChange={(e) => setNewDesc(e.target.value)}
                   />
                   <label htmlFor="editIngredient">New Ingredient:</label>
-                  {/* Convert the ingredient input to a dropdown */}
                   <button
                     type="button"
                     onClick={() => setShowDropdown(!showDropdown)}
