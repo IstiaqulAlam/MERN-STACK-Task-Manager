@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { CreateDropDown } from './dropdown';
+import CreateEffortPointsDropDown from './dropdown-effortpoints';
 import { TaskList } from './MainPageScript';
 
 const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
@@ -127,18 +128,11 @@ if (!taskName || pickedIngredient === 'Pick an Ingredient' || !dueDate || !effor
                             popperPlacement="bottom-start" // Align pop-up to bottom-left
                         />
                     </div>
-                    <select
-                        id="effortPoints"
-                        value={effortPoints}
-                        onChange={(e) => setEffortPoints(e.target.value)}
-                    >
-                        <option value="">Select Effort Points</option>
-                        {effortPointOptions.map((option) => (
-                            <option key={option} value={option}>
-                                {option}
-                            </option>
-                        ))}
-                    </select>
+                    <CreateEffortPointsDropDown
+                        effortPointOptions={effortPointOptions}
+                        selectedEffortPoints={effortPoints}
+                        setSelectedEffortPoints={setEffortPoints}
+                    />
                     <button
                         type="button"
                         onClick={() => setShowDropdown(!showDropdown)}

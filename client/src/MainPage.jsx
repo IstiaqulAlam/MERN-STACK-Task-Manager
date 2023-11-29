@@ -6,9 +6,9 @@ import { CreateTaskModal } from './CreateTaskModal';
 import { YourIngredients } from './ViewIngredientsModal';
 import { loginWithStoredCredentials } from './AutoLogin';
 import { CreateDropDown } from './dropdown';
-import DropdownOptions from './DropdownOptions';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import CreateEffortPointsDropDown from './dropdown-effortpoints';
 
 function MainPage() {
   const urlBase = 'http://67.205.172.88:5000';
@@ -29,8 +29,6 @@ function MainPage() {
   const [error, setError] = useState('');
   const [loadingIngredientNames, setLoadingIngredientNames] = useState(true);
   const [ingredientNames, setIngredientNames] = useState([]);
-
-  const [taskDropdowns, setTaskDropdowns] = useState({});
 
   const location = useLocation();
   const user = location.state?.user;
@@ -277,36 +275,48 @@ function MainPage() {
               </div>
               <div className="form-title">Your tasks</div>
 
-              {loadingTasks && <p>Loading tasks...</p>}
-              {!loadingTasks && tasks.length === 0 && <p>No tasks available</p>}
-              {!loadingTasks &&
-                tasks.map((task) => (
-                  <div key={task._id} className="task-container">
-                    <p>{`Task: ${task.Desc}, 
-                Ingredient: ${task.Ingredient}, 
-                Due Date: ${formatDate(task.DueDate)},
-                Effort Points: ${task.EffortPoints}`}</p>
-                    <button
-                      type="button"
-                      className="dropdown-button"
-                      onClick={() =>
-                        setTaskDropdowns((prevDropdowns) => ({
-                          ...prevDropdowns,
-                          [task._id]: !prevDropdowns[task._id],
-                        }))
-                      }
-                    >
-                      Options
-                    </button>
-                    {taskDropdowns[task._id] && (
-                      <DropdownOptions
-                        onDelete={(e) => handleDeleteClick(task._id, e)}
-                        onFinish={(e) => handleFinishTask(task._id, e)}
-                        onEdit={(e) => handleEditClick(task._id, e)}
-                      />
-                    )}
-                  </div>
-                ))}
+              {!loadingTasks && (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Task name</th>
+                      <th>Ingredient</th>
+                      <th>Due Date</th>
+                      <th>Due Time</th>
+                      <th>Effort Points</th>
+                      <th>Edit</th>
+                      <th>Finish</th>
+                      <th>Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tasks.map((task) => (
+                      <tr key={task._id}>
+                        <td>{task.Desc}</td>
+                        <td>{task.Ingredient}</td>
+                        <td>{formatDate(task.DueDate)}</td>
+                        <td>{new Date(task.DueDate).toLocaleTimeString()}</td>
+                        <td>{task.EffortPoints}</td>
+                        <td>
+                          <button type="button" onClick={(e) => handleEditClick(task._id, e)}>
+                            Edit
+                          </button>
+                        </td>
+                        <td>
+                          <button type="button" onClick={(e) => handleFinishTask(task._id, e)}>
+                            Finish
+                          </button>
+                        </td>
+                        <td>
+                          <button type="button" onClick={(e) => handleDeleteClick(task._id, e)}>
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
 
               {showDeleteConfirmation && (
                 <>
@@ -398,18 +408,11 @@ function MainPage() {
                           popperPlacement="bottom-start"
                         />
                       </div>
-                      <select
-                        id="editEffortPoints"
-                        value={selectedEffortPoints}
-                        onChange={(e) => setSelectedEffortPoints(e.target.value)}
-                      >
-                        <option value="">Select Effort Points</option>
-                        {effortPointOptions.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
+                      <CreateEffortPointsDropDown
+                        effortPointOptions={effortPointOptions}
+                        selectedEffortPoints={selectedEffortPoints}
+                        setSelectedEffortPoints={setSelectedEffortPoints}
+                      />
                       <button type="button" onClick={handleEditTask}>
                         Save
                       </button>
