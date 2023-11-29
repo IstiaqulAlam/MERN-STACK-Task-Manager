@@ -9,6 +9,7 @@ import { CreateDropDown } from './dropdown';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import CreateEffortPointsDropDown from './dropdown-effortpoints';
+import { BsSearch, BsCheckLg, BsFillTrash3Fill, BsFillPencilFill } from "react-icons/bs";
 
 function MainPage() {
   const urlBase = 'http://67.205.172.88:5000';
@@ -246,6 +247,7 @@ function MainPage() {
               >
                 Calendar
               </button>
+
               <div className="search-container">
 
                 <div className="form-title">Search tasks</div>
@@ -255,27 +257,26 @@ function MainPage() {
                   placeholder="Search by Task Name"
                   value={searchName}
                   onChange={(e) => setSearchName(e.target.value)}
+                  className="input_mainpage"
                 />
-                <button type="button" onClick={handleSearchByName}>
-                  Search by Name
+                <button type="button" className="button_search" onClick={handleSearchByName}>
+                  <BsSearch/>
                 </button>
-
                 <input
                   type="date"
                   placeholder="Search by Due Date"
                   value={searchDueDate}
+                  className="input_mainpage"
                   onChange={(e) => setSearchDueDate(e.target.value)}
                 />
-                <button type="button" onClick={handleSearchByDueDate}>
-                  Search by Due Date
-                </button>
-                <button type="button" onClick={getTasks}>
-                  Clear Search
+                <button type="button" className="button_search" onClick={handleSearchByDueDate}>
+                  <BsSearch/>
                 </button>
               </div>
               <div className="form-title">Your tasks</div>
               {loadingTasks && <p>Loading tasks...</p>}
               {!loadingTasks && tasks.length === 0 && <p>No tasks available</p>}
+              <div className="tableDiv">
               {!loadingTasks && (
                 <table>
                   <thead>
@@ -298,17 +299,17 @@ function MainPage() {
                         <td>{task.EffortPoints}</td>
                         <td>
                           <button type="button" onClick={(e) => handleEditClick(task._id, e)}>
-                            Edit
+                            <BsFillPencilFill/>
                           </button>
                         </td>
                         <td>
                           <button type="button" onClick={(e) => handleFinishTask(task._id, e)}>
-                            Finish
+                            <BsCheckLg/>
                           </button>
                         </td>
                         <td>
                           <button type="button" onClick={(e) => handleDeleteClick(task._id, e)}>
-                            Delete
+                             <BsFillTrash3Fill/>
                           </button>
                         </td>
                       </tr>
@@ -316,6 +317,7 @@ function MainPage() {
                   </tbody>
                 </table>
               )}
+              </div>
 
               {showDeleteConfirmation && (
                 <>
