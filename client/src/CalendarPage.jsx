@@ -101,7 +101,7 @@ const TaskCalendar = () => {
   const handleEditTask = async () => {
     // Check if either new description or new ingredient is not filled out
     if (!newDesc || newIngredient === 'Select an Ingredient') {
-      const errorMessage = 'Please fill out both fields.';
+      const errorMessage = 'Please fill out all fields.';
       console.error(errorMessage);
       setError(errorMessage);
       return;

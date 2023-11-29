@@ -65,30 +65,31 @@ const handleFinish = async (taskId, username, setTasks) => {
   }
 };
 
-const handleEdit = async (taskId, username, newDesc, newIngredient, setTasks) => {
+const handleEdit = async (taskId, username, newDesc, newIngredient, setTasks, dueDate, effortPoints) => {
   try {
-    const response = await fetch(`http://67.205.172.88:5000/api/editTask/${taskId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        desc: newDesc,
-        ingredient: newIngredient,
-      }),
-    });
+     const response = await fetch(`http://67.205.172.88:5000/api/editTask/${taskId}`, {
+        method: 'PUT',
+        headers: {
+           'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+           desc: newDesc,
+           ingredient: newIngredient,
+           dueDate: dueDate, 
+           effortPoints: effortPoints,
+        }),
+     });
 
-    if (response.ok) {
-      console.log(`Task edited successfully`);
-      // Fetch the updated task list and update the state
-      const updatedTasks = await TaskList(username);
-      setTasks(updatedTasks);
-    } else {
-      console.error('Failed to edit task:', response.statusText);
-    }
+     if (response.ok) {
+        console.log(`Task edited successfully`);
+        // Fetch the updated task list and update the state
+        const updatedTasks = await TaskList(username);
+        setTasks(updatedTasks);
+     } else {
+        console.error('Failed to edit task:', response.statusText);
+     }
   } catch (error) {
-    console.error('Error editing task:', error.message);
+     console.error('Error editing task:', error.message);
   }
 };
-
 export { TaskList, handleDelete, handleFinish, handleEdit };

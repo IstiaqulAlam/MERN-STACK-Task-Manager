@@ -679,7 +679,9 @@ router.put('/editTask/:taskId', async (req, res, next) => {
       {
         $set: {
           Desc: req.body.desc || existingTask.Desc, // Update only if new desc is provided
-          Ingredient: req.body.ingredient || existingTask.Ingredient // Update only if new ingredient is provided
+          Ingredient: req.body.ingredient || existingTask.Ingredient, // Update only if new ingredient is provided
+          DueDate: req.body.dueDate ? new Date(req.body.dueDate) : existingTask.DueDate, // Update due date if provided, otherwise keep existing value
+          EffortPoints: req.body.effortPoints ? parseInt(req.body.effortPoints) : existingTask.EffortPoints // Update effort points if provided, otherwise keep existing value
         }
       }
     );

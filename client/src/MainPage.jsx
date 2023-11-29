@@ -7,6 +7,8 @@ import { YourIngredients } from './ViewIngredientsModal';
 import { loginWithStoredCredentials } from './AutoLogin';
 import { CreateDropDown } from './dropdown';
 import DropdownOptions from './DropdownOptions';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 function MainPage() {
   const urlBase = 'http://67.205.172.88:5000';
@@ -35,6 +37,9 @@ function MainPage() {
 
   const [searchName, setSearchName] = useState('');
   const [searchDueDate, setSearchDueDate] = useState('');
+  const [selectedDueDate, setSelectedDueDate] = useState('');
+  const [selectedEffortPoints, setSelectedEffortPoints] = useState(0);
+  const effortPointOptions = [1, 2, 3, 4, 5, 6];
 
   const getTasks = async () => {
     try {
@@ -101,14 +106,25 @@ function MainPage() {
   const handleEditTask = async () => {
     // Check if either new description or new ingredient is not filled out
     if (!newDesc || newIngredient === 'Select an Ingredient') {
-      const errorMessage = 'Please fill out both fields.';
+      const errorMessage = 'Please fill out all fields.';
       console.error(errorMessage);
       setError(errorMessage);
       return;
     }
 
     try {
-      await handleEdit(taskIdToEdit, user, newDesc, newIngredient, setTasks);
+      const formattedDueDate = selectedDueDate.toISOString();
+
+
+      await handleEdit(
+        taskIdToEdit,
+        user,
+        newDesc,
+        newIngredient,
+        setTasks,
+        formattedDueDate,
+        selectedEffortPoints
+      );
       setTaskIdToEdit(null);
       setShowEditModal(false);
       // Optionally, clear the input fields
@@ -124,6 +140,8 @@ function MainPage() {
       setError('');
     }
   };
+
+
   const handleEditClick = async (taskId, e) => {
     e.preventDefault();
     setTaskIdToEdit(taskId);
@@ -155,7 +173,7 @@ function MainPage() {
     // Navigate to the calendar page
     navigate('/calendar', { state: { user } });
   };
-  
+
 
   const handleSearchByName = async () => {
     try {
@@ -177,7 +195,7 @@ function MainPage() {
       console.error('Error fetching tasks:', error.message);
     }
   };
-  
+
 
   const handleSearchByDueDate = async () => {
     if (searchDueDate.trim() === '') {
@@ -232,32 +250,32 @@ function MainPage() {
               </button>
               <div className="search-container">
 
-              <div className="form-title">Search tasks</div>
+                <div className="form-title">Search tasks</div>
 
-        <input
-          type="text"
-          placeholder="Search by Task Name"
-          value={searchName}
-          onChange={(e) => setSearchName(e.target.value)}
-        />
-        <button type="button" onClick={handleSearchByName}>
-          Search by Name
-        </button>
+                <input
+                  type="text"
+                  placeholder="Search by Task Name"
+                  value={searchName}
+                  onChange={(e) => setSearchName(e.target.value)}
+                />
+                <button type="button" onClick={handleSearchByName}>
+                  Search by Name
+                </button>
 
-        <input
-          type="date"
-          placeholder="Search by Due Date"
-          value={searchDueDate}
-          onChange={(e) => setSearchDueDate(e.target.value)}
-        />
-        <button type="button" onClick={handleSearchByDueDate}>
-          Search by Due Date
-        </button>
-        <button type="button" onClick={getTasks}>
-          Clear Search
-        </button>
-      </div>
-      <div className="form-title">Your tasks</div>
+                <input
+                  type="date"
+                  placeholder="Search by Due Date"
+                  value={searchDueDate}
+                  onChange={(e) => setSearchDueDate(e.target.value)}
+                />
+                <button type="button" onClick={handleSearchByDueDate}>
+                  Search by Due Date
+                </button>
+                <button type="button" onClick={getTasks}>
+                  Clear Search
+                </button>
+              </div>
+              <div className="form-title">Your tasks</div>
 
               {loadingTasks && <p>Loading tasks...</p>}
               {!loadingTasks && tasks.length === 0 && <p>No tasks available</p>}
@@ -340,25 +358,58 @@ function MainPage() {
                         onChange={(e) => setNewDesc(e.target.value)}
                       />
                       <label htmlFor="editIngredient">New Ingredient:</label>
-                      {/* Convert the ingredient input to a dropdown */}
                       <button
                         type="button"
                         onClick={() => setShowDropdown(!showDropdown)}
                         id="editIngredientButton"
-                        disabled={loadingIngredientNames} // Disable the button when ingredient names are loading
+                        disabled={loadingIngredientNames}
                       >
                         {loadingIngredientNames ? 'Loading...' : newIngredient}
                       </button>
-                      {loadingIngredientNames}
                       {!loadingIngredientNames && showDropdown && (
                         <CreateDropDown
                           setIngredientHook={(ingredient) => {
                             setNewIngredient(ingredient);
-                            setShowDropdown(false); // Close the dropdown when an ingredient is selected
+                            setShowDropdown(false);
                           }}
                           ingredientNames={ingredientNames}
                         />
                       )}
+                      <div className="datepicker-container">
+                        <DatePicker
+                          selected={selectedDueDate}
+                          onChange={(date) => setSelectedDueDate(date)}
+                          customInput={<DateButton />}
+                          dateFormat="MMMM d, yyyy"
+                          popperPlacement="bottom-start"
+                        />
+                      </div>
+                      <div className="datepicker-container">
+                        <DatePicker
+                          selected={selectedDueDate}
+                          onChange={(date) => setSelectedDueDate(date)}
+                          customInput={<DateButton2 />}
+                          dateFormat="h:mm aa"
+                          showTimeSelect
+                          showTimeSelectOnly
+                          timeIntervals={15}
+                          timeCaption="Time"
+                          placeholderText="Select Due Date and Time"
+                          popperPlacement="bottom-start"
+                        />
+                      </div>
+                      <select
+                        id="editEffortPoints"
+                        value={selectedEffortPoints}
+                        onChange={(e) => setSelectedEffortPoints(e.target.value)}
+                      >
+                        <option value="">Select Effort Points</option>
+                        {effortPointOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
                       <button type="button" onClick={handleEditTask}>
                         Save
                       </button>
@@ -395,5 +446,18 @@ function MainPage() {
   }
 
 }
-
+const DateButton = ({ value, onClick }) => (
+  <div className="date-button-container">
+    <button type="button" className="date-button" onClick={onClick}>
+      {value || 'Select Due Date'}
+    </button>
+  </div>
+);
+const DateButton2 = ({ value, onClick }) => (
+  <div className="date-button-container">
+    <button type="button" className="date-button" onClick={onClick}>
+      {value || 'Select Time'}
+    </button>
+  </div>
+);
 export default MainPage;
