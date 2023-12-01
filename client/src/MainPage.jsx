@@ -8,7 +8,6 @@ import { loginWithStoredCredentials } from './AutoLogin';
 import { CreateDropDown } from './dropdown';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import CreateEffortPointsDropDown from './dropdown-effortpoints';
 import { BsSearch, BsCheckLg, BsFillTrash3Fill, BsFillPencilFill } from "react-icons/bs";
 
 function MainPage() {
@@ -39,7 +38,10 @@ function MainPage() {
   const [searchDueDate, setSearchDueDate] = useState('');
   const [selectedDueDate, setSelectedDueDate] = useState('');
   const [selectedEffortPoints, setSelectedEffortPoints] = useState(0);
-  const effortPointOptions = [1, 2, 3, 4, 5, 6];
+
+  const [showFinishConfirmation, setShowFinishConfirmation] = useState(false);
+  const [taskIdToFinish, setTaskIdToFinish] = useState(null);
+
 
   const getTasks = async () => {
     setLoadingTasks(false);
@@ -92,12 +94,24 @@ function MainPage() {
 
   const handleFinishTask = async (taskId, e) => {
     e.preventDefault();
-    await handleFinish(taskId, user, setTasks);
-    // Fetch the updated user's ingredients list and update the state
-    const updatedIngredients = await YourIngredients(user);
-    setIngredients(updatedIngredients);
+    setTaskIdToFinish(taskId);
+    setShowFinishConfirmation(true);
+  };
+  const handleConfirmFinish = async () => {
+    if (taskIdToFinish !== null) {
+      await handleFinish(taskIdToFinish, user, setTasks);
+      // Fetch the updated user's ingredients list and update the state
+      const updatedIngredients = await YourIngredients(user);
+      setIngredients(updatedIngredients);
+      setTaskIdToFinish(null);
+      setShowFinishConfirmation(false);
+    }
   };
 
+  const handleCancelFinish = () => {
+    setTaskIdToFinish(null);
+    setShowFinishConfirmation(false);
+  };
   const handleCancelDelete = () => {
     setTaskIdToDelete(null);
     setShowDeleteConfirmation(false);
@@ -149,6 +163,7 @@ function MainPage() {
     setNewIngredient(task.Ingredient);
     setNewDesc(task.Desc);
     setSelectedEffortPoints(task.EffortPoints);
+    setSelectedDueDate(new Date(task.DueDate));
     setShowEditModal(true);
 
     // Fetch the list of ingredients when the Edit Task modal is opened
@@ -282,7 +297,7 @@ function MainPage() {
                   className="input_mainpage"
                 />
                 <button type="button" className="button_search" onClick={handleSearchByName}>
-                  <BsSearch/>
+                  <BsSearch />
                 </button>
                 <input
                   type="date"
@@ -292,75 +307,12 @@ function MainPage() {
                   onChange={(e) => setSearchDueDate(e.target.value)}
                 />
                 <button type="button" className="button_search" onClick={handleSearchByDueDate}>
-                  <BsSearch/>
+                  <BsSearch />
                 </button>
               </div>
               <div className="form-title">Your tasks</div>
               {showLoadingMessage && <p>Loading tasks...</p>}
               {!showLoadingMessage && tasks.length === 0 && <p>No tasks available</p>}
-              <div className="tableDiv">
-              {!loadingTasks && (
-                <table>
-                  <thead>
-                    <tr>
-                      <th scope='col' onClick={() => sortByName()}>Task Name</th>
-                      <th scope='col' onClick={() => sortByIngredient()}>Ingredeient</th>
-                      <th scope='col' onClick={() => sortByDate()}>Due by</th>
-                      <th scope='col' onClick={() => sortByEffort()}>Effort</th>
-                      <th>Edit</th>
-                      <th>Finish</th>
-                      <th>Delete</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tasks.map((task) => (
-                      <tr key={task._id}>
-                        <td>{task.Desc}</td>
-                        <td>{task.Ingredient}</td>
-                        <td>{formatDate(task.DueDate)}</td>
-                        <td>{task.EffortPoints}</td>
-                        <td>
-                          <button type="button" onClick={(e) => handleEditClick(task, e)}>
-                            <BsFillPencilFill/>
-                          </button>
-                        </td>
-                        <td>
-                          <button type="button" onClick={(e) => handleFinishTask(task._id, e)}>
-                            <BsCheckLg/>
-                          </button>
-                        </td>
-                        <td>
-                          <button type="button" onClick={(e) => handleDeleteClick(task._id, e)}>
-                             <BsFillTrash3Fill/>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-              </div>
-
-              {showDeleteConfirmation && (
-                <>
-                  <div id="overlay" onClick={handleCancelDelete}></div>
-                  <div className="modalContainer">
-                    <div className="modalBox">
-                      <p>Are you sure you want to delete this task?</p>
-                      <button type="button" onClick={handleConfirmDelete}>Yes</button>
-                      <button type="button" onClick={handleCancelDelete}>No</button>
-                    </div>
-                  </div>
-                </>
-              )}
-              {showModalTask && (
-                <CreateTaskModal
-                  username={user}
-                  setTasks={setTasks}
-                  setShowModalTask={setShowModalTask}
-                />
-              )}
-              {showModalTask ? <div id="overlay" onClick={() => setShowModalTask(false)}></div> : undefined}
               {loadingIngredients && <p>Loading ingredients...</p>}
               {!loadingIngredients && showModalIngredients && (
                 <>
@@ -377,6 +329,86 @@ function MainPage() {
                   </div>
                 </>
               )}
+              <div className="tableDiv">
+                {!loadingTasks && (
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope='col' onClick={() => sortByName()}>Task Name</th>
+                        <th scope='col' onClick={() => sortByIngredient()}>Ingredeient</th>
+                        <th scope='col' onClick={() => sortByDate()}>Due by</th>
+                        <th scope='col' onClick={() => sortByEffort()}>Effort</th>
+                        <th>Edit</th>
+                        <th>Finish</th>
+                        <th>Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tasks.map((task) => (
+                        <tr key={task._id}>
+                          <td>{task.Desc}</td>
+                          <td>{task.Ingredient}</td>
+                          <td>{formatDate(task.DueDate)}</td>
+                          <td>{task.EffortPoints}</td>
+                          <td>
+                            <button type="button" onClick={(e) => handleEditClick(task, e)}>
+                              <BsFillPencilFill />
+                            </button>
+                          </td>
+                          <td>
+                            <button type="button" onClick={(e) => handleFinishTask(task._id, e)}>
+                              <BsCheckLg />
+                            </button>
+                          </td>
+                          <td>
+                            <button type="button" onClick={(e) => handleDeleteClick(task._id, e)}>
+                              <BsFillTrash3Fill />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+
+              {showDeleteConfirmation && (
+                <>
+                  <div id="overlay" onClick={handleCancelDelete}></div>
+                  <div className="modalContainer">
+                    <div className="modalBox">
+                      <p>Are you sure you want to delete this task?</p>
+                      <button type="button" onClick={handleConfirmDelete}>Yes</button>
+                      <button type="button" onClick={handleCancelDelete}>No</button>
+                    </div>
+                  </div>
+                </>
+              )}
+              {showFinishConfirmation && (
+                <>
+                  <div id="overlay" onClick={handleCancelFinish}></div>
+                  <div className="modalContainer">
+                    <div className="modalBox">
+                      <p>Are you sure you want to finish this task?</p>
+                      <button type="button" onClick={handleConfirmFinish}>
+                        Yes
+                      </button>
+                      <button type="button" onClick={handleCancelFinish}>
+                        No
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {showModalTask && (
+                <CreateTaskModal
+                  username={user}
+                  setTasks={setTasks}
+                  setShowModalTask={setShowModalTask}
+                />
+              )}
+              {showModalTask ? <div id="overlay" onClick={() => setShowModalTask(false)}></div> : undefined}
               {showEditModal && (
                 <>
                   <div id="overlay" onClick={() => setShowEditModal(false)}></div>
@@ -431,10 +463,12 @@ function MainPage() {
                           popperPlacement="bottom-start"
                         />
                       </div>
-                      <CreateEffortPointsDropDown
-                        effortPointOptions={effortPointOptions}
-                        selectedEffortPoints={selectedEffortPoints}
-                        setSelectedEffortPoints={setSelectedEffortPoints}
+                      <input
+                        type="number"
+                        id="editEffortPoints"
+                        placeholder="Effort Points"
+                        value={selectedEffortPoints}
+                        onChange={(e) => setSelectedEffortPoints(e.target.value)}
                       />
                       <button type="button" onClick={handleEditTask}>
                         Save

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { CreateDropDown } from './dropdown';
-import CreateEffortPointsDropDown from './dropdown-effortpoints';
 import { TaskList } from './MainPageScript';
 
 const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
@@ -16,7 +15,6 @@ const CreateTaskModal = ({ username, setTasks, setShowModalTask }) => {
     const [ingredientNames, setIngredientNames] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const effortPointOptions = [1, 2, 3, 4, 5, 6];
 
     const fetchIngredientNames = async () => {
         if (ingredientNames.length === 0) {
@@ -105,6 +103,14 @@ if (!taskName || pickedIngredient === 'Pick an Ingredient' || !dueDate || !effor
                         value={taskName}
                         onChange={(e) => setTaskName(e.target.value)}
                     />
+                    <button
+                        type="button"
+                        onClick={() => setShowDropdown(!showDropdown)}
+                        id="ingredientButton"
+                    >
+                        {pickedIngredient}
+                    </button>
+                    {showDropdown ? <CreateDropDown setIngredientHook={handleIngredientSelection} ingredientNames={ingredientNames} /> : undefined}
                     <div className="datepicker-container">
                         <DatePicker
                             selected={dueDate}
@@ -118,32 +124,28 @@ if (!taskName || pickedIngredient === 'Pick an Ingredient' || !dueDate || !effor
                         <DatePicker
                             selected={dueDate}
                             onChange={(date) => setDueDate(date)}
-                            customInput={<DateButton2 />} // Custom button
-                            dateFormat="h:mm aa" // Display both date and time
-                            showTimeSelect // Show the time input
-                            showTimeSelectOnly // Hide the date input
-                            timeIntervals={15} // Set time intervals (in minutes)
-                            timeCaption="Time" // Text for the time input label
+                            customInput={<DateButton2 />}
+                            dateFormat="h:mm aa"
+                            showTimeSelect 
+                            showTimeSelectOnly 
+                            timeIntervals={15} 
+                            timeCaption="Time" 
                             placeholderText="Select Due Date and Time"
-                            popperPlacement="bottom-start" // Align pop-up to bottom-left
+                            popperPlacement="bottom-start" 
                         />
                     </div>
-                    <CreateEffortPointsDropDown
-                        effortPointOptions={effortPointOptions}
-                        selectedEffortPoints={effortPoints}
-                        setSelectedEffortPoints={setEffortPoints}
+                    <input
+                        className="rounded-pill p-2 mb-4"
+                        id="EffortPoints"
+                        placeholder="Effort Points"
+                        type="number"
+                        required
+                        value={effortPoints}
+                        onChange={(e) => setEffortPoints(e.target.value)}
                     />
-                    <button
-                        type="button"
-                        onClick={() => setShowDropdown(!showDropdown)}
-                        id="ingredientButton"
-                    >
-                        {pickedIngredient}
-                    </button>
                     <button type="button" onClick={handleSubmit} id="submitButton" disabled={loading}>
                         {loading ? 'Submitting...' : 'Submit'}
                     </button>
-                    {showDropdown ? <CreateDropDown setIngredientHook={handleIngredientSelection} ingredientNames={ingredientNames} /> : undefined}
                     {error && <p className="error-message">{error}</p>}
                 </div>
             </div>
