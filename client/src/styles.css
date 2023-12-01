@@ -26,6 +26,19 @@ th {
     flex: 1;
 }
 
+th button {
+    margin: 0.5em 0;
+    padding: 0.5em;
+    width: calc(100%);
+    box-sizing: border-box;
+    border: none;
+    border-left: 2px solid #3498db;
+    background-color: #3498db;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
 td {
     margin: 0;
     font-size: 1em;
@@ -40,7 +53,7 @@ table {
 
 }
 
-.tableDiv   {
+.tableDiv {
     height: 550px;
     overflow-y: auto;
 }
@@ -256,6 +269,7 @@ dropdownItem {
 .task-list-container {
     height: 700px;
 }
+
 .date-button-container {
     display: flex;
     align-items: flex-start;
@@ -272,8 +286,8 @@ dropdownItem {
     align-items: center;
     justify-content: center;
     z-index: 2;
-  }
-  
+}
+
 .modal-box {
     background-color: #fff;
     padding: 2em;
@@ -291,6 +305,3 @@ dropdownItem {
     box-sizing: border-box;
     border: none;
 }
-
-
-  

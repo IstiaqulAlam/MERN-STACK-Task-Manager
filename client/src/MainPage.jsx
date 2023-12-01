@@ -42,6 +42,24 @@ function MainPage() {
   const [showFinishConfirmation, setShowFinishConfirmation] = useState(false);
   const [taskIdToFinish, setTaskIdToFinish] = useState(null);
 
+  const [sortOrder, setSortOrder] = useState({
+    field: null,
+    ascending: true,
+  });
+  const sortTable = async (field, e) => {
+    e.preventDefault();
+
+    const isAscending = sortOrder.field === field ? !sortOrder.ascending : true;
+    const sortedTasks = [...tasks].sort((a, b) =>
+      isAscending ? a[field] > b[field] : a[field] < b[field]
+    );
+
+    setSortOrder({
+      field,
+      ascending: isAscending,
+    });
+    setTasks(sortedTasks);
+  };
 
   const getTasks = async () => {
     setLoadingTasks(false);
@@ -232,23 +250,6 @@ function MainPage() {
     }
   };
 
-  const sortByName = () => {
-    console.log(tasks);
-    setTasks([...tasks.sort((a, b) => (a.Desc > b.Desc) - (a.Desc < b.Desc))]);
-  }
-
-  const sortByIngredient = () => {
-    setTasks([...tasks.sort((a, b) => (a.Ingredient > b.Ingredient) - (a.Ingredient < b.Ingredient))]);
-  }
-
-  const sortByDate = () => {
-    setTasks([...tasks.sort((a, b) => (a.DueDate > b.DueDate) - (a.DueDate < b.DueDate))]);
-  }
-
-  const sortByEffort = () => {
-    setTasks([...tasks.sort((a, b) => (a.EffortPoints > b.EffortPoints) - (a.EffortPoints < b.EffortPoints))]);
-  }
-
   return (
     <>
       <h1>Veggie Tasks</h1>
@@ -334,10 +335,26 @@ function MainPage() {
                   <table>
                     <thead>
                       <tr>
-                        <th scope='col' onClick={() => sortByName()}>Task Name</th>
-                        <th scope='col' onClick={() => sortByIngredient()}>Ingredeient</th>
-                        <th scope='col' onClick={() => sortByDate()}>Due by</th>
-                        <th scope='col' onClick={() => sortByEffort()}>Effort</th>
+                        <th scope='col'>
+                          <button onClick={(e) => sortTable('Desc', e)}>
+                            Task Name {sortOrder.field === 'Desc' && (sortOrder.ascending ? '↑' : '↓')}
+                          </button>
+                        </th>
+                        <th scope='col'>
+                          <button onClick={(e) => sortTable('Ingredient', e)}>
+                            Ingredient {sortOrder.field === 'Ingredient' && (sortOrder.ascending ? '↑' : '↓')}
+                          </button>
+                        </th>
+                        <th scope='col'>
+                          <button onClick={(e) => sortTable('DueDate', e)}>
+                            Due by {sortOrder.field === 'DueDate' && (sortOrder.ascending ? '↑' : '↓')}
+                          </button>
+                        </th>
+                        <th scope='col'>
+                          <button onClick={(e) => sortTable('EffortPoints', e)}>
+                            Effort {sortOrder.field === 'EffortPoints' && (sortOrder.ascending ? '↑' : '↓')}
+                          </button>
+                        </th>
                         <th>Edit</th>
                         <th>Finish</th>
                         <th>Delete</th>
