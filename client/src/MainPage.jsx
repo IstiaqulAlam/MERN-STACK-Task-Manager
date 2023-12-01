@@ -335,25 +335,17 @@ function MainPage() {
                   <table>
                     <thead>
                       <tr>
-                        <th scope='col'>
-                          <button onClick={(e) => sortTable('Desc', e)}>
-                            Task Name {sortOrder.field === 'Desc' && (sortOrder.ascending ? '↑' : '↓')}
-                          </button>
+                        <th scope='col' onClick={(e) => sortTable('Desc', e)}>
+                          Task Name {sortOrder.field === 'Desc' ? (sortOrder.ascending ? '↑' : '↓') : '↕'}
                         </th>
-                        <th scope='col'>
-                          <button onClick={(e) => sortTable('Ingredient', e)}>
-                            Ingredient {sortOrder.field === 'Ingredient' && (sortOrder.ascending ? '↑' : '↓')}
-                          </button>
+                        <th scope='col' onClick={(e) => sortTable('Ingredient', e)}>
+                          Ingredient {sortOrder.field === 'Ingredient' ? (sortOrder.ascending ? '↑' : '↓') : '↕'}
                         </th>
-                        <th scope='col'>
-                          <button onClick={(e) => sortTable('DueDate', e)}>
-                            Due by {sortOrder.field === 'DueDate' && (sortOrder.ascending ? '↑' : '↓')}
-                          </button>
+                        <th scope='col' onClick={(e) => sortTable('DueDate', e)}>
+                          Due by {sortOrder.field === 'DueDate' ? (sortOrder.ascending ? '↑' : '↓') : '↕'}
                         </th>
-                        <th scope='col'>
-                          <button onClick={(e) => sortTable('EffortPoints', e)}>
-                            Effort {sortOrder.field === 'EffortPoints' && (sortOrder.ascending ? '↑' : '↓')}
-                          </button>
+                        <th scope='col' onClick={(e) => sortTable('EffortPoints', e)}>
+                          Effort {sortOrder.field === 'EffortPoints' ? (sortOrder.ascending ? '↑' : '↓') : '↕'}
                         </th>
                         <th>Edit</th>
                         <th>Finish</th>

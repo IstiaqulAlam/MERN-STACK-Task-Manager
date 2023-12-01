@@ -26,17 +26,9 @@ th {
     flex: 1;
 }
 
-th button {
-    margin: 0.5em 0;
-    padding: 0.5em;
-    width: calc(100%);
-    box-sizing: border-box;
-    border: none;
-    border-left: 2px solid #3498db;
-    background-color: #3498db;
-    color: white;
-    font-weight: bold;
+th:hover {
     cursor: pointer;
+    background-color: #ddd;
 }
 
 td {
