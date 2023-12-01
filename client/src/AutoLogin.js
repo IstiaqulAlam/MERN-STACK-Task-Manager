@@ -18,7 +18,7 @@ const loginWithStoredCredentials = async () => {
       if (response.ok) {
         const jsonObject = await response.json();
         console.log(JSON.stringify(jsonObject));
-        return storedUsername;
+        return jsonObject;
       } else {
         console.error('Login failed');
         return null;

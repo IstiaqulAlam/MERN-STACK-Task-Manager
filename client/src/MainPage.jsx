@@ -4,11 +4,11 @@ import './styles.css';
 import { TaskList, handleDelete, handleFinish, handleEdit } from './MainPageScript';
 import { CreateTaskModal } from './CreateTaskModal';
 import { YourIngredients } from './ViewIngredientsModal';
-import { loginWithStoredCredentials } from './AutoLogin';
 import { CreateDropDown } from './dropdown';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { BsSearch, BsCheckLg, BsFillTrash3Fill, BsFillPencilFill } from "react-icons/bs";
+import ProfileModal from './ProfilePageModal';
 
 function MainPage() {
   const urlBase = 'http://67.205.172.88:5000';
@@ -41,6 +41,7 @@ function MainPage() {
 
   const [showFinishConfirmation, setShowFinishConfirmation] = useState(false);
   const [taskIdToFinish, setTaskIdToFinish] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const [sortOrder, setSortOrder] = useState({
     field: null,
@@ -64,7 +65,6 @@ function MainPage() {
   const getTasks = async () => {
     setLoadingTasks(false);
     try {
-      loginWithStoredCredentials();
       if (user) {
         const taskData = await TaskList(user);
         setTasks(taskData);
@@ -95,6 +95,18 @@ function MainPage() {
   }
 
   const navigate = useNavigate();
+  //const [alertShown, setAlertShown] = useState(false);
+  const storedUsername = localStorage.getItem('username');
+  const storedPassword = localStorage.getItem('password');
+  /*if (!alertShown && !storedUsername && !storedPassword) {
+    alert("You are not logged in! Returning to login page.");
+    setAlertShown(true);
+    navigate('/');
+  }*/
+  if (!storedUsername && !storedPassword) {
+    alert("You are not logged in! Returning to login page.");
+    navigate('/');
+  }
 
   const handleDeleteClick = async (taskId, e) => {
     e.preventDefault();
@@ -214,7 +226,6 @@ function MainPage() {
 
   const handleSearchByName = async () => {
     try {
-      loginWithStoredCredentials();
       if (user) {
         if (searchName.trim() === '') {
           // If searchName is empty, fetch the unfiltered list of tasks
@@ -255,6 +266,18 @@ function MainPage() {
       <h1>Veggie Tasks</h1>
       <div className="container">
         <div className="main-page-box">
+        <button
+        type="button"
+        className="button_mainpage"
+        onClick={() => setShowProfileModal(true)}
+      >
+        View Profile
+      </button>
+      {showProfileModal && (
+        <ProfileModal 
+        user={user} 
+        setShowProfileModal={setShowProfileModal} />
+      )}
           <div className="form-title">Welcome, {user}</div>
           <div className="task-list-container">
             <form id="mainForm">
