@@ -30,6 +30,7 @@ function MainPage() {
   const [error, setError] = useState('');
   const [loadingIngredientNames, setLoadingIngredientNames] = useState(true);
   const [ingredientNames, setIngredientNames] = useState([]);
+  const [showLoadingMessage, setShowLoadingMessage] = useState(true);
 
   const location = useLocation();
   const user = location.state?.user;
@@ -41,6 +42,7 @@ function MainPage() {
   const effortPointOptions = [1, 2, 3, 4, 5, 6];
 
   const getTasks = async () => {
+    setLoadingTasks(false);
     try {
       loginWithStoredCredentials();
       if (user) {
@@ -49,9 +51,8 @@ function MainPage() {
       }
     } catch (error) {
       console.error('Error fetching tasks:', error.message);
-    } finally {
-      setLoadingTasks(false);
     }
+    setShowLoadingMessage(false);
   };
 
   const getIngredients = async () => {
@@ -141,9 +142,13 @@ function MainPage() {
   };
 
 
-  const handleEditClick = async (taskId, e) => {
+  const handleEditClick = async (task, e) => {
     e.preventDefault();
-    setTaskIdToEdit(taskId);
+    console.log(task);
+    setTaskIdToEdit(task._id);
+    setNewIngredient(task.Ingredient);
+    setNewDesc(task.Desc);
+    setSelectedEffortPoints(task.EffortPoints);
     setShowEditModal(true);
 
     // Fetch the list of ingredients when the Edit Task modal is opened
@@ -212,6 +217,23 @@ function MainPage() {
     }
   };
 
+  const sortByName = () => {
+    console.log(tasks);
+    setTasks([...tasks.sort((a, b) => (a.Desc > b.Desc) - (a.Desc < b.Desc))]);
+  }
+
+  const sortByIngredient = () => {
+    setTasks([...tasks.sort((a, b) => (a.Ingredient > b.Ingredient) - (a.Ingredient < b.Ingredient))]);
+  }
+
+  const sortByDate = () => {
+    setTasks([...tasks.sort((a, b) => (a.DueDate > b.DueDate) - (a.DueDate < b.DueDate))]);
+  }
+
+  const sortByEffort = () => {
+    setTasks([...tasks.sort((a, b) => (a.EffortPoints > b.EffortPoints) - (a.EffortPoints < b.EffortPoints))]);
+  }
+
   return (
     <>
       <h1>Veggie Tasks</h1>
@@ -274,17 +296,17 @@ function MainPage() {
                 </button>
               </div>
               <div className="form-title">Your tasks</div>
-              {loadingTasks && <p>Loading tasks...</p>}
-              {!loadingTasks && tasks.length === 0 && <p>No tasks available</p>}
+              {showLoadingMessage && <p>Loading tasks...</p>}
+              {!showLoadingMessage && tasks.length === 0 && <p>No tasks available</p>}
               <div className="tableDiv">
               {!loadingTasks && (
                 <table>
                   <thead>
                     <tr>
-                      <th>Task name</th>
-                      <th>Ingredient</th>
-                      <th>Due Date</th>
-                      <th>Effort Points</th>
+                      <th scope='col' onClick={() => sortByName()}>Task Name</th>
+                      <th scope='col' onClick={() => sortByIngredient()}>Ingredeient</th>
+                      <th scope='col' onClick={() => sortByDate()}>Due by</th>
+                      <th scope='col' onClick={() => sortByEffort()}>Effort</th>
                       <th>Edit</th>
                       <th>Finish</th>
                       <th>Delete</th>
@@ -298,7 +320,7 @@ function MainPage() {
                         <td>{formatDate(task.DueDate)}</td>
                         <td>{task.EffortPoints}</td>
                         <td>
-                          <button type="button" onClick={(e) => handleEditClick(task._id, e)}>
+                          <button type="button" onClick={(e) => handleEditClick(task, e)}>
                             <BsFillPencilFill/>
                           </button>
                         </td>
