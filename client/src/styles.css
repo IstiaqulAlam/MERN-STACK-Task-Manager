@@ -324,3 +324,8 @@ dropdownItem {
     box-sizing: border-box;
     border: none;
 }
+
+.custom-calendar-tile {
+    width: 100%; 
+    height: 150px;
+  }

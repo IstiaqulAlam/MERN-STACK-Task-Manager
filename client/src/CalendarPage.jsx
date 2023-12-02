@@ -17,7 +17,7 @@ const TaskCalendar = () => {
   const user = location.state?.user || {};
 
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [tasksByDueDate, setTasksByDueDate] = useState([]);
+  const [tasksByDueDate, setTasksByDueDate] = useState({});
   const navigate = useNavigate();
   const [taskDropdowns, setTaskDropdowns] = useState({});
 
@@ -35,7 +35,6 @@ const TaskCalendar = () => {
   const [loadingIngredientNames, setLoadingIngredientNames] = useState(true);
   const [ingredientNames, setIngredientNames] = useState([]);
 
-
   const fetchUserTasks = async (date) => {
     try {
       if (!user) {
@@ -48,20 +47,15 @@ const TaskCalendar = () => {
 
       // Extract tasks for the selected date
       const tasksForSelectedDate = tasksByDueDate[date.toISOString().split('T')[0]] || [];
+      setTasksByDueDate({ ...tasksByDueDate, [date.toISOString().split('T')[0]]: tasksForSelectedDate });
 
       console.log('Tasks for Selected Date:', tasksForSelectedDate);
 
-      setTasksByDueDate(tasksForSelectedDate);
     } catch (error) {
       console.error('Error fetching user tasks:', error);
     } finally {
       setLoadingTasks(false);
     }
-  };
-
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-    fetchUserTasks(date);
   };
 
   const handleDeleteClick = async (taskId, e) => {
@@ -145,10 +139,52 @@ const TaskCalendar = () => {
       setLoadingIngredientNames(false); // Set loading state to false when fetching is complete
     }
   };
-  if (loadingTasks) {
-    fetchUserTasks(selectedDate);
-  }
 
+  const fetchAllUserTasks = async () => {
+    try {
+      if (!user) {
+        console.error('User is undefined or has no username');
+        return;
+      }
+
+      const response = await axios.get(`${urlBase}/api/getUserTaskDates/${user}`);
+      const tasksByDueDate = response.data;
+
+      setTasksByDueDate(tasksByDueDate);
+    } catch (error) {
+      console.error('Error fetching user tasks:', error);
+    } finally {
+      setLoadingTasks(false);
+    }
+  };
+
+  const formatDayContent = (date) => {
+    const tasksForDate = tasksByDueDate[date.toISOString().split('T')[0]] || [];
+
+    return (
+      <ul>
+        {tasksForDate.map((task) => (
+          <li key={task._id}>
+            <strong>{task.Desc}</strong>
+            <p>Ingredient: {task.Ingredient}</p>
+          <p>Due Date: {new Date(task.DueDate).toLocaleString()}</p>
+          <p>Effort Points: {task.EffortPoints}</p>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    // Fetch user tasks for all dates
+    fetchAllUserTasks();
+  };
+
+  if (loadingTasks) {
+    // Fetch user tasks for all dates if tasks are still loading
+    fetchAllUserTasks();
+  }
   return (
     <div>
       <h1>Task Calendar</h1>
@@ -160,7 +196,13 @@ const TaskCalendar = () => {
       </button>
       <div style={{ display: 'flex' }}>
         <div style={{ marginRight: '20px' }}>
-          <Calendar onChange={handleDateChange} value={selectedDate} />
+          <Calendar
+            onChange={handleDateChange}
+            value={selectedDate}
+            tileContent={({ date, view }) => view === 'month' && formatDayContent(date)}
+            tileClassName={({ date }) => 'custom-calendar-tile'}
+            style={{ width: '500px', height: '500px'}}
+          />
         </div>
         <div>
           <div>
@@ -171,33 +213,40 @@ const TaskCalendar = () => {
             <p>Loading tasks...</p>
           ) : (
             <ul>
-              {tasksByDueDate.map((task) => (
-                <li key={task._id}>
-                  <strong>{task.Desc}</strong>
-                  <p>Ingredient: {task.Ingredient}</p>
-                  <p>Due Date: {new Date(task.DueDate).toLocaleString()}</p>
-                  <p>Effort Points: {task.EffortPoints}</p>
-                  <button
-                    type="button"
-                    className="dropdown-button"
-                    onClick={() =>
-                      setTaskDropdowns((prevDropdowns) => ({
-                        ...prevDropdowns,
-                        [task._id]: !prevDropdowns[task._id],
-                      }))
-                    }
-                  >
-                    Options
-                  </button>
-                  {taskDropdowns[task._id] && (
-                    <DropdownOptions
-                      onDelete={(e) => handleDeleteClick(task._id, e)}
-                      onFinish={(e) => handleFinishTask(task._id, e)}
-                      onEdit={(e) => handleEditClick(task._id, e)}
-                    />
-                  )}
-                </li>
-              ))}
+       {Object.keys(tasksByDueDate).map((date) => (
+  <div key={date}>
+    <h3>{date}</h3>
+    <ul>
+      {tasksByDueDate[date].map((task) => (
+        <li key={task._id}>
+          <strong>{task.Desc}</strong>
+          <p>Ingredient: {task.Ingredient}</p>
+          <p>Due Date: {new Date(task.DueDate).toLocaleString()}</p>
+          <p>Effort Points: {task.EffortPoints}</p>
+          <button
+            type="button"
+            className="dropdown-button"
+            onClick={() =>
+              setTaskDropdowns((prevDropdowns) => ({
+                ...prevDropdowns,
+                [task._id]: !prevDropdowns[task._id],
+              }))
+            }
+          >
+            Options
+          </button>
+          {taskDropdowns[task._id] && (
+            <DropdownOptions
+              onDelete={(e) => handleDeleteClick(task._id, e)}
+              onFinish={(e) => handleFinishTask(task._id, e)}
+              onEdit={(e) => handleEditClick(task._id, e)}
+            />
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+))}
             </ul>
           )}
 
