@@ -15,7 +15,6 @@ const TaskCalendar = () => {
   const navigate = useNavigate();
   const [loadingTasks, setLoadingTasks] = useState(true);
 
-
   const fetchAllUserTasks = async () => {
     try {
       if (!user) {
@@ -59,6 +58,8 @@ const TaskCalendar = () => {
     // Fetch user tasks for all dates if tasks are still loading
     fetchAllUserTasks();
   }
+
+  
   return (
     <div>
       <h1>Task Calendar</h1>
@@ -66,14 +67,13 @@ const TaskCalendar = () => {
         type="button"
         className="button_mainpage3"
         onClick={() => navigate('/mainpage', { state: { user } })}
-        id="ViewRecipesButton">Back to Main Page
+        id="MainPageButton">Back to Main Page
       </button>
       <div style={{ display: 'flex' }}>
           <Calendar
             onChange={handleDateChange}
             value={selectedDate}
             tileContent={({ date, view }) => view === 'month' && formatDayContent(date)}
-            tileClassName={({ date }) => 'custom-calendar-tile'}
           />
       </div>
     </div>
