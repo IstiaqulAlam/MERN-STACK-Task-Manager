@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginWithStoredCredentials } from './AutoLogin'
 
-const ProfileModal = ({ user, setShowProfileModal }) => {
+const ProfileModal = () => {
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
     const fetchUserData = async () => {
@@ -35,7 +35,6 @@ const ProfileModal = ({ user, setShowProfileModal }) => {
         <>
             {userData && (
                 <>
-                    <div id="overlay" onClick={() => setShowProfileModal(false)}></div>
                     <div className="modal-container">
                         <div className="modal-box">
                             {userData ? (

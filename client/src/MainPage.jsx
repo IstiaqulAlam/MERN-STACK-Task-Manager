@@ -104,7 +104,6 @@ function MainPage() {
     navigate('/');
   }*/
   if (!storedUsername && !storedPassword) {
-    alert("You are not logged in! Returning to login page.");
     navigate('/');
   }
 
@@ -277,8 +276,12 @@ function MainPage() {
               View Profile
             </button>
             {showProfileModal && (
-              <ProfileModal user={user} setShowProfileModal={setShowProfileModal} />
+              <ProfileModal 
+              setShowProfileModal={setShowProfileModal} 
+              />
             )}
+            {showProfileModal ? <div id="overlay" onClick={() => setShowProfileModal(false)}></div> : undefined}
+
           </div>
           <div className="task-list-container">
             <form id="mainForm">
