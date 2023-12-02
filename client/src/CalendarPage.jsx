@@ -1,13 +1,13 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DropdownOptions from './DropdownOptions';
 import { YourIngredients } from './ViewIngredientsModal';
 import { handleDelete, handleFinish, handleEdit } from './MainPageScript';
 import { CreateDropDown } from './dropdown';
+import './styles.css';
 
 
 const TaskCalendar = () => {
@@ -201,7 +201,7 @@ const TaskCalendar = () => {
             value={selectedDate}
             tileContent={({ date, view }) => view === 'month' && formatDayContent(date)}
             tileClassName={({ date }) => 'custom-calendar-tile'}
-            style={{ width: '500px', height: '500px'}}
+            style={{ width: '1500px', height: '500px'}}
           />
         </div>
         <div>
