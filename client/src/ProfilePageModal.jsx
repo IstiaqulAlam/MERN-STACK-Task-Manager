@@ -31,13 +31,6 @@ const ProfileModal = ({ user, setShowProfileModal }) => {
         navigate('/');
     };
 
-    const handleDeleteAccount = () => {
-        if (window.confirm('Are you sure you want to delete your account?')) {
-            //Delete account logic?
-            navigate('/');
-        }
-    };
-
     return (
         <>
             {userData && (
@@ -47,16 +40,18 @@ const ProfileModal = ({ user, setShowProfileModal }) => {
                         <div className="modal-box">
                             {userData ? (
                                 <>
-                                    <p>User Information</p>
+                                    <p style={{ fontSize: '20px' }}>Your Profile</p>
+                                    <br />
                                     <p>First Name: {userData.FirstName}</p>
+                                    <br />
                                     <p>Last Name: {userData.LastName}</p>
+                                    <br />
                                     <p>Username: {userData.Username}</p>
+                                    <br />
                                     <p>Email: {userData.Email}</p>
+                                    <br />
                                     <button type="button" onClick={handleLogout}>
                                         Logout
-                                    </button>
-                                    <button type="button" onClick={handleDeleteAccount}>
-                                        Delete Account
                                     </button>
                                 </>
                             ) : (

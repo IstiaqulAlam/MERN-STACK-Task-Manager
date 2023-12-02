@@ -266,19 +266,20 @@ function MainPage() {
       <h1>Veggie Tasks</h1>
       <div className="container">
         <div className="main-page-box">
-        <button
-        type="button"
-        className="button_mainpage"
-        onClick={() => setShowProfileModal(true)}
-      >
-        View Profile
-      </button>
-      {showProfileModal && (
-        <ProfileModal 
-        user={user} 
-        setShowProfileModal={setShowProfileModal} />
-      )}
-          <div className="form-title">Welcome, {user}</div>
+
+        <div className="welcome-user-container">
+            <div className="form-title2 welcome-user">Welcome, {user}</div>
+            <button
+              type="button"
+              className="button_mainpage2"
+              onClick={() => setShowProfileModal(true)}
+            >
+              View Profile
+            </button>
+            {showProfileModal && (
+              <ProfileModal user={user} setShowProfileModal={setShowProfileModal} />
+            )}
+          </div>
           <div className="task-list-container">
             <form id="mainForm">
               <button
