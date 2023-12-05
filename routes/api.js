@@ -6,11 +6,6 @@ const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const nodemailer = require('nodemailer');
 
-//JWT token
-const jwt = require('jsonwebtoken');
-const expressJwt = require('express-jwt');
-const jwtSecret = process.env.JWT_SECRET || 'veggietalesaccess';
-
 require('dotenv').config()
 
 router.get('/get', (req, res, next) => {
@@ -49,7 +44,7 @@ router.post('/login', async (req, res, next) => {
   await client.close();
 });
 
-router.post('/register', expressJwt({ secret: jwtSecret }), async (req, res, next) => {
+router.post('/register', async (req, res, next) => {
   const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const collection = database.collection('Users');
@@ -132,12 +127,9 @@ router.post('/register', expressJwt({ secret: jwtSecret }), async (req, res, nex
       PasswordChangeable: false
     });
 
-    const token = jwt.sign(user, jwtSecret, { expiresIn: '1h' }); // Adjust the expiration time as needed
-
     res.json({
       success: true,
-      message: 'Check your email for verification.',
-      token: token, // Include the JWT in the response
+      message: "Check your email for verification."
     });
 
   } catch (error) {
@@ -524,6 +516,7 @@ router.get('/getUserTasks/:username', async (req, res, next) => {
     await client.close();
   }
 });
+
 router.get('/getUserTaskDates/:username', async (req, res, next) => {
   const username = req.params.username;
 
@@ -560,7 +553,13 @@ router.get('/getUserTaskDates/:username', async (req, res, next) => {
           userTasksByDueDate[dueDate] = [];
         }
 
-        userTasksByDueDate[dueDate].push(task);
+        userTasksByDueDate[dueDate].push({
+          _id: task._id,
+          Desc: task.Desc,
+          Ingredient: task.Ingredient,
+          DueDate: task.DueDate,
+          EffortPoints: task.EffortPoints,
+        });
       }
     }
 
@@ -572,6 +571,7 @@ router.get('/getUserTaskDates/:username', async (req, res, next) => {
     await client.close();
   }
 });
+
 router.post('/redeemRecipe/:username/:recipeName', async (req, res, next) => {
   const username = req.params.username; // Extract the user ID from the request parameters
   const recipeName = req.params.recipeName; // Extract the recipe name from the request parameters
@@ -679,7 +679,9 @@ router.put('/editTask/:taskId', async (req, res, next) => {
       {
         $set: {
           Desc: req.body.desc || existingTask.Desc, // Update only if new desc is provided
-          Ingredient: req.body.ingredient || existingTask.Ingredient // Update only if new ingredient is provided
+          Ingredient: req.body.ingredient || existingTask.Ingredient, // Update only if new ingredient is provided
+          DueDate: req.body.dueDate ? new Date(req.body.dueDate) : existingTask.DueDate, // Update due date if provided, otherwise keep existing value
+          EffortPoints: req.body.effortPoints ? parseInt(req.body.effortPoints) : existingTask.EffortPoints // Update effort points if provided, otherwise keep existing value
         }
       }
     );
