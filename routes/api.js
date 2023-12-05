@@ -5,8 +5,30 @@ const Todo = require('../models/todo');
 const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
 
 require('dotenv').config()
+
+function authenticateToken(req, res, next) {
+  const token = req.header('Authorization');
+  if (!token) {
+    return res.status(401).json({
+      msg: 'Access denied, token not provided'
+    });
+  }
+
+  jwt.verify(token, 'key', (err, user) => {
+    if (err) {
+      return res.status(403).json({
+        msg: 'Invalid token'
+      });
+    }
+
+    req.user = user;
+    next();
+  });
+}
+
 
 router.get('/get', (req, res, next) => {
   // This will return all the data, exposing only the id and action field to the client
@@ -34,14 +56,39 @@ router.delete('/delete/:id', (req, res, next) => {
 });
 
 router.post('/login', async (req, res, next) => {
-  const client = await MongoClient.connect(process.env.DB);
-  const database = client.db('COP4331');
-  const collection = database.collection('Users');
-  const users = await collection.find({ Username: req.body.username, Password: req.body.password }).toArray();
-  res.json({
-    msg: users
-  });
-  await client.close();
+  try {
+    const client = await MongoClient.connect(process.env.DB);
+    const database = client.db('COP4331');
+    const collection = database.collection('Users');
+    
+    // Perform user authentication
+    const users = await collection.find({ Username: req.body.username, Password: req.body.password }).toArray();
+
+    if (users.length > 0) {
+      // User authenticated successfully
+
+      // Generate JWT token
+      const token = jwt.sign({ username: req.body.username }, 'key', { expiresIn: '1h' });
+      console.log(token);
+      
+      res.json({
+        msg: 'Login successful',
+        token: token
+      });
+    } else {
+      // User authentication failed
+      res.status(401).json({
+        msg: 'Authentication failed'
+      });
+    }
+
+    await client.close();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      msg: 'Internal server error'
+    });
+  }
 });
 
 router.post('/register', async (req, res, next) => {
@@ -84,13 +131,13 @@ router.post('/register', async (req, res, next) => {
     // Generate a verification code
     const verificationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     const transporter = nodemailer.createTransport({
-      host: 'smtp.zoho.com',
-      port: 465,
-      secure: true,
+        host: 'smtp.zoho.com',
+        port: 465,
+        secure: true,
       auth: {
-        user: 'nodemailer123321@zohomail.com',
-        pass: process.env.EMAILPWD,
-      },
+          user: 'nodemailer123321@zohomail.com',
+          pass: process.env.EMAILPWD,
+        },
     });
 
     // Send verification code via email
@@ -136,7 +183,7 @@ router.post('/register', async (req, res, next) => {
     console.error("Error during registration:", error);
     res.status(500).json({ error: "Internal server error" });
   } finally {
-    client.close();
+    client.close(); 
   }
 });
 
@@ -149,47 +196,47 @@ router.post('/verify', async (req, res, next) => {
 
   try {
     console.log("Inside /verify endpoint");
-
+    
     const verificationCodeMatches = await unverifiedCollection.findOne({ VerifyCode: req.body.verificationCode });
 
 
-    const FirstNameQuery = verificationCodeMatches.FirstName;
-    const LastNameQuery = verificationCodeMatches.LastName;
-    const UsernameQuery = verificationCodeMatches.Username;
-    const PasswordQuery = verificationCodeMatches.Password;
-    const EmailQuery = verificationCodeMatches.Email;
-    const date = new Date();
-    const id = new ObjectId();
+      const FirstNameQuery = verificationCodeMatches.FirstName;
+      const LastNameQuery = verificationCodeMatches.LastName;
+      const UsernameQuery = verificationCodeMatches.Username;
+      const PasswordQuery = verificationCodeMatches.Password;
+      const EmailQuery = verificationCodeMatches.Email;
+      const date = new Date();
+      const id = new ObjectId();
 
-    // Insert the user into the 'Users' collection
-    await collection.insertOne({
-      _id: id,
-      FirstName: FirstNameQuery,
-      LastName: LastNameQuery,
-      Username: UsernameQuery,
-      Password: PasswordQuery,
-      DateCreated: date,
-      DateLastLoggedIn: "",
-      Email: EmailQuery,
-      Recipes: [],
-      Tasks: [],
-    });
+      // Insert the user into the 'Users' collection
+      await collection.insertOne({
+        _id: id,
+        FirstName: FirstNameQuery,
+        LastName: LastNameQuery,
+        Username: UsernameQuery,
+        Password: PasswordQuery,
+        DateCreated: date,
+        DateLastLoggedIn: "",
+        Email: EmailQuery,
+        Recipes: [],
+        Tasks: [],
+      });
 
-    // Remove the entire document from the 'Unverified Users' collection
-    await unverifiedCollection.deleteOne({ VerifyCode: req.body.verificationCode });
-    const baskId = new ObjectId();
-    // Insert a new basket document in the 'Baskets' collection
-    await basketsCollection.insertOne({
-      _id: baskId,
-      User: UsernameQuery, // Assuming the 'User' field is related to the username
-      Ingredients: []
-    });
+      // Remove the entire document from the 'Unverified Users' collection
+      await unverifiedCollection.deleteOne({ VerifyCode: req.body.verificationCode });
+      const baskId = new ObjectId();
+      // Insert a new basket document in the 'Baskets' collection
+      await basketsCollection.insertOne({
+        _id: baskId,
+        User: UsernameQuery, // Assuming the 'User' field is related to the username
+        Ingredients: []
+      });
 
-    res.json({
-      success: true,
-      message: "User is successfully verified and registered."
-    });
-  } catch (error) {
+      res.json({
+        success: true,
+        message: "User is successfully verified and registered."
+      });
+    } catch (error) {
     console.error("Error during verification:", error);
     res.status(500).json({ error: "Internal server error" });
   } finally {
@@ -218,7 +265,7 @@ router.put('/updateLastLoggedIn', async (req, res, next) => {
 
 
 //endpoint for creating a task
-router.post('/createTask', async (req, res, next) => {
+router.post('/createTask', authenticateToken, async (req, res, next) => {
   const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const usersCollection = database.collection('Users');
@@ -293,7 +340,7 @@ router.delete('/deleteTask/:username/:taskId', async (req, res, next) => {
 
     // Convert taskId to ObjectId for comparison
     const taskObjectId = new ObjectId(taskId);
-
+    
     // Check if the task ID is in the user's 'Tasks' array
     const taskIndex = user.Tasks.findIndex(task => task.equals(taskObjectId));
 
@@ -486,12 +533,12 @@ router.get('/getUserTasks/:username', async (req, res, next) => {
     if (!user) {
       res.status(404).json({ msg: `User ${username} not found` });
       return;
-    }
+  }
 
-    if (!user.Tasks || user.Tasks.length === 0) {
+  if (!user.Tasks || user.Tasks.length === 0) {
       res.status(404).json({ msg: `User ${username} has no tasks` });
       return;
-    }
+  }
 
     // Initialize an array to store task information
     const userTasksInfo = [];
@@ -544,23 +591,22 @@ router.get('/getUserTaskDates/:username', async (req, res, next) => {
     for (let i = 0; i < user.Tasks.length; i++) {
       const taskId = user.Tasks[i];
 
-      const task = await tasksCollection.findOne({ _id: taskId });
+      const task = await tasksCollection.findOne({ _id: new ObjectId(taskId) });
 
       if (task) {
-        const dueDate = new Date(task.DueDate);
+        const dueDate = new Date(task.DueDate).toISOString().split('T')[0];
 
-        // Check if the parsed date is a valid date
-        if (!isNaN(dueDate.getTime())) {
-          const dueDateString = dueDate.toISOString().split('T')[0];
-
-          if (!userTasksByDueDate[dueDateString]) {
-            userTasksByDueDate[dueDateString] = [];
-          }
-
-          userTasksByDueDate[dueDateString].push(task);
-        } else {
-          console.warn(`Invalid DueDate for task ${taskId}. Skipping.`);
+        if (!userTasksByDueDate[dueDate]) {
+          userTasksByDueDate[dueDate] = [];
         }
+
+        userTasksByDueDate[dueDate].push({
+          _id: task._id,
+          Desc: task.Desc,
+          Ingredient: task.Ingredient,
+          DueDate: task.DueDate,
+          EffortPoints: task.EffortPoints,
+        });
       }
     }
 
@@ -572,12 +618,6 @@ router.get('/getUserTaskDates/:username', async (req, res, next) => {
     await client.close();
   }
 });
-
-// Helper function to check if a date string is valid
-function isValidDate(dateString) {
-  const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
-  return regex.test(dateString);
-}
 
 router.post('/redeemRecipe/:username/:recipeName', async (req, res, next) => {
   const username = req.params.username; // Extract the user ID from the request parameters
@@ -720,13 +760,13 @@ router.post('/resetPasswordRequest', async (req, res, next) => {
     // Generate a verification code
     const verificationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     const transporter = nodemailer.createTransport({
-      host: 'smtp.zoho.com',
-      port: 465,
-      secure: true,
+        host: 'smtp.zoho.com',
+        port: 465,
+        secure: true,
       auth: {
-        user: 'nodemailer123321@zohomail.com',
-        pass: process.env.EMAILPWD,
-      },
+          user: 'nodemailer123321@zohomail.com',
+          pass: process.env.EMAILPWD,
+        },
     });
 
     await collectionResets.insertOne({
@@ -769,18 +809,19 @@ router.post('/allowPasswordChange', async (req, res, next) => {
   const usersCollection = database.collection('Users');
   const collectionResets = database.collection('Reset Codes');
   const existingUser = await collectionResets.findOne({ RestoreID: req.body.restoreid });
-  if (!existingUser) {
+  if (!existingUser)
+  {
     res.status(500).json({ error: "Verification code not found" });
     return;
   }
   await usersCollection.updateOne(
-    { Email: existingUser.Email },
-    {
-      $set: {
-        PasswordChangeable: true
+      { Email: existingUser.Email },
+      {
+        $set: {
+          PasswordChangeable: true
+        }
       }
-    }
-  );
+    );
 
   user = await usersCollection.findOne({ Email: existingUser.Email });
   res.json({ msg: "May change password", user });
@@ -791,19 +832,20 @@ router.post('/changePassword', async (req, res, next) => {
   const database = client.db('COP4331');
   const usersCollection = database.collection('Users');
   const user = await usersCollection.findOne({ _id: new ObjectId(req.body._id) })
-  if (!user.PasswordChangeable) {
+  if (!user.PasswordChangeable)
+  {
     res.status(500).json({ msg: "Cannot change password" });
     return;
   }
   await usersCollection.updateOne(
-    { _id: new ObjectId(req.body._id) },
-    {
-      $set: {
-        Password: req.body.password,
-        PasswordChangeable: false
+      { _id: new ObjectId(req.body._id) },
+      {
+        $set: {
+          Password: req.body.password,
+          PasswordChangeable: false
+        }
       }
-    }
-  );
+    );
   res.json({ msg: "Password Changed" });
 });
 
