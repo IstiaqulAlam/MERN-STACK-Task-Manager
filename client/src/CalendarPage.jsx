@@ -35,10 +35,13 @@ const TaskCalendar = () => {
 
   const formatDayContent = (date) => {
     const tasksForDate = tasksByDueDate[date.toISOString().split('T')[0]] || [];
-
+  
+    // Sort tasks chronologically based on due date
+    const sortedTasks = tasksForDate.sort((a, b) => new Date(a.DueDate) - new Date(b.DueDate));
+  
     return (
       <ul>
-        {tasksForDate.map((task) => (
+        {sortedTasks.map((task) => (
           <li key={task._id}>
             <strong>{task.Desc}</strong>
             <p>
@@ -52,6 +55,7 @@ const TaskCalendar = () => {
       </ul>
     );
   };
+  
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
