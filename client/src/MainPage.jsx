@@ -535,7 +535,6 @@ function MainPage() {
       day: 'numeric',
       hour: 'numeric',
       minute: 'numeric',
-      second: 'numeric',
       hour12: true, // Use 12-hour clock format
     };
     return new Date(dateString).toLocaleDateString(undefined, options);

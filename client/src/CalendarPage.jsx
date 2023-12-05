@@ -41,7 +41,12 @@ const TaskCalendar = () => {
         {tasksForDate.map((task) => (
           <li key={task._id}>
             <strong>{task.Desc}</strong>
-            <p>{new Date(task.DueDate).toLocaleTimeString()}</p>
+            <p>
+              {new Date(task.DueDate).toLocaleTimeString(undefined, {
+                hour: 'numeric',
+                minute: 'numeric',
+              })}
+            </p>
           </li>
         ))}
       </ul>
@@ -59,7 +64,7 @@ const TaskCalendar = () => {
     fetchAllUserTasks();
   }
 
-  
+
   return (
     <div>
       <h1>Task Calendar</h1>
@@ -70,11 +75,11 @@ const TaskCalendar = () => {
         id="MainPageButton">Back to Main Page
       </button>
       <div style={{ display: 'flex' }}>
-          <Calendar
-            onChange={handleDateChange}
-            value={selectedDate}
-            tileContent={({ date, view }) => view === 'month' && formatDayContent(date)}
-          />
+        <Calendar
+          onChange={handleDateChange}
+          value={selectedDate}
+          tileContent={({ date, view }) => view === 'month' && formatDayContent(date)}
+        />
       </div>
     </div>
   );
