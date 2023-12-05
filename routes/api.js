@@ -5,8 +5,30 @@ const Todo = require('../models/todo');
 const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
 
 require('dotenv').config()
+
+function authenticateToken(req, res, next) {
+  const token = req.header('Authorization');
+  if (!token) {
+    return res.status(401).json({
+      msg: 'Access denied, token not provided'
+    });
+  }
+
+  jwt.verify(token, 'key', (err, user) => {
+    if (err) {
+      return res.status(403).json({
+        msg: 'Invalid token'
+      });
+    }
+
+    req.user = user;
+    next();
+  });
+}
+
 
 router.get('/get', (req, res, next) => {
   // This will return all the data, exposing only the id and action field to the client
@@ -34,14 +56,39 @@ router.delete('/delete/:id', (req, res, next) => {
 });
 
 router.post('/login', async (req, res, next) => {
-  const client = await MongoClient.connect(process.env.DB);
-  const database = client.db('COP4331');
-  const collection = database.collection('Users');
-  const users = await collection.find({ Username: req.body.username, Password: req.body.password}).toArray();
-  res.json({
-      msg: users
+  try {
+    const client = await MongoClient.connect(process.env.DB);
+    const database = client.db('COP4331');
+    const collection = database.collection('Users');
+    
+    // Perform user authentication
+    const users = await collection.find({ Username: req.body.username, Password: req.body.password }).toArray();
+
+    if (users.length > 0) {
+      // User authenticated successfully
+
+      // Generate JWT token
+      const token = jwt.sign({ username: req.body.username }, 'key', { expiresIn: '1h' });
+      console.log(token);
+      
+      res.json({
+        msg: 'Login successful',
+        token: token
+      });
+    } else {
+      // User authentication failed
+      res.status(401).json({
+        msg: 'Authentication failed'
+      });
+    }
+
+    await client.close();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      msg: 'Internal server error'
     });
-  await client.close();
+  }
 });
 
 router.post('/register', async (req, res, next) => {
@@ -218,7 +265,7 @@ router.put('/updateLastLoggedIn', async (req, res, next) => {
 
 
 //endpoint for creating a task
-router.post('/createTask', async (req, res, next) => {
+router.post('/createTask', authenticateToken, async (req, res, next) => {
   const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const usersCollection = database.collection('Users');
