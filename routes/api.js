@@ -69,10 +69,10 @@ router.post('/login', async (req, res, next) => {
 
       // Generate JWT token
       const token = jwt.sign({ username: req.body.username }, 'key', { expiresIn: '1h' });
-      console.log(token);
+      console.log(users[0].Username);
       
       res.json({
-        msg: 'Login successful',
+        msg: users,
         token: token
       });
     } else {
@@ -265,7 +265,7 @@ router.put('/updateLastLoggedIn', async (req, res, next) => {
 
 
 //endpoint for creating a task
-router.post('/createTask', authenticateToken, async (req, res, next) => {
+router.post('/createTask', async (req, res, next) => {
   const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const usersCollection = database.collection('Users');
@@ -831,14 +831,14 @@ router.post('/changePassword', async (req, res, next) => {
   const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const usersCollection = database.collection('Users');
-  const user = await usersCollection.findOne({ _id: new ObjectId(req.body._id) })
+  const user = await usersCollection.findOne({ Email: req.body.email })
   if (!user.PasswordChangeable)
   {
     res.status(500).json({ msg: "Cannot change password" });
     return;
   }
   await usersCollection.updateOne(
-      { _id: new ObjectId(req.body._id) },
+      { Email: req.body.email },
       {
         $set: {
           Password: req.body.password,
