@@ -5,7 +5,7 @@ import { Verify } from './VerifyScript';
 function VerificationPage() {
   
   const navigate = useNavigate();
-  const [verificationNotice, setVerificationNotice] = useState("Enter the verification code that you recieved in your email");
+  const [verificationNotice, setVerificationNotice] = useState("Enter the verification code that you recieved in your email.");
   const handleVerification = async () => {
     const result = await Verify();
 

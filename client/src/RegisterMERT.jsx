@@ -5,7 +5,7 @@ import { Register } from './RegisterScript';
 
 function RegisterMERT() {
   const navigate = useNavigate();
-  const [registerNotice, setRegisterNotice] = useState("Password must be 6 chars long and include a special character");
+  const [registerNotice, setRegisterNotice] = useState("Your password must be 6 chars long and include a special character.");
 
   const handleRegister = async () => {
     const registrationResult = await Register();
