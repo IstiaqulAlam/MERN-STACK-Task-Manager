@@ -182,7 +182,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       String url = 'http://cop4331group2.com:5000/api/login';
 
                       String ret = await CardsData.getJson(url, payload);
+                      print(ret);
                       Map<String, dynamic> jsonObject = json.decode(ret);
+                      print(jsonObject.runtimeType);
+                      print(jsonObject);
                       labels= jsonObject["msg"];
                       for(var label in labels) {
                         userId = label["_id"];

@@ -89,15 +89,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   DefaultTextStyle(
                   child: Text('Make Life'),
                   style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 44.0,
-                  fontWeight: FontWeight.bold,
+                    fontFamily: 'Roboto',
+                    color: Colors.white,
+                    fontSize: 44.0,
+                    fontWeight: FontWeight.bold,
                   ),
                   ),
                   const SizedBox(height: 10.0),
                   DefaultTextStyle(
-                    child: Text('A Game'),
+                    child: Text('A Game.'),
                     style: TextStyle(
+                      fontFamily: 'Lato',
                       color: Colors.white,
                       fontSize: 44.0,
                       fontWeight: FontWeight.bold,

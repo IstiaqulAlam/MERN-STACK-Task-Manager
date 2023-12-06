@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_app/utils/getAPI.dart';
 import 'package:flutter_app/screens/LoginScreen.dart';
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -12,17 +13,19 @@ class _MainScreenState extends State<MainScreen> {
   String message = "",
       newMessageText = '';
   String username = GlobalData.loginName;
-  String desc = '', ingredient = '';
+  String desc = '', ingredient = '', dueDate= '', effortPoints= '';
   List<Map<String, dynamic>> userTasks = [];
   List<Map<String, dynamic>> originalUserTasks = [];
   String searchText = '';
+  var originalDate;
+  String formattedDate= '';
   FocusNode searchFocusNode = FocusNode();
 
 
 
   List<Task> tasks = [
-    Task('Task 1', 'Description for Task 1',),
-    Task('Task 2', 'Description for Task 2',),
+    Task('Task 1', 'Description for Task 1', 'Due Date for Task 1',),
+    Task('Task 2', 'Description for Task 2', 'Due Date for Task 2'),
     // Add more tasks as needed
   ];
 
@@ -70,13 +73,17 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  Future<void> editTask(String taskId, String newDesc, String newIngredient) async {
+  Future<void> editTask(String taskId, String newDesc, String newIngredient, newDueDate) async {
+    print(newDueDate);
     try {
       String url = 'http://cop4331group2.com:5000/api/editTask/$taskId';
       String payload = jsonEncode({
         'desc': newDesc,
         'ingredient': newIngredient,
+        'dueDate': newDueDate,
+
       });
+      print(payload);
 
       final response = await http.put(
         Uri.parse(url),
@@ -101,6 +108,25 @@ class _MainScreenState extends State<MainScreen> {
     try {
       final response = await http.delete(
         Uri.parse('http://cop4331group2.com:5000/api/deleteTask/$username/$taskId'),
+      );
+
+      if (response.statusCode == 200) {
+        // Successful deletion
+        print('Task deleted successfully');
+        // You might want to update your local state or refresh the task list
+      } else {
+        // Handle errors here
+        print('Failed to delete task: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error during task deletion: $e');
+    }
+  }
+
+  Future<void> finishTask(String username, String taskId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('http://cop4331group2.com:5000/api/finishTask/$username/$taskId'),
       );
 
       if (response.statusCode == 200) {
@@ -150,10 +176,16 @@ class _MainScreenState extends State<MainScreen> {
                 },
               ),
               actions: [
-                Positioned(
-                  top: 16.0,
-                  right: 16.0,
-                  child: CustomPopupMenu(), // Use the CustomPopupMenu widget
+                IconButton(
+                  icon: Icon(Icons.more_vert, color: Colors.white),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CustomMenuDialog();
+                      },
+                    );
+                  },
                 ),
               ]
           ),
@@ -161,7 +193,7 @@ class _MainScreenState extends State<MainScreen> {
             child: Align(
               alignment: Alignment.topCenter,
               child: Padding(
-                padding: EdgeInsets.only(top: 100.0),
+                padding: EdgeInsets.only(top: 30.0),
                 child: Column(
                   //mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -179,9 +211,20 @@ class _MainScreenState extends State<MainScreen> {
                         decoration: InputDecoration(
                           labelText: 'Search Tasks',
                           prefixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder( // Set border color and shape
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: BorderSide(color: Colors.blue), // Border color
+                                ),
+                          filled: true, // Fill the background color
+                          fillColor: Colors.grey[100], // Background color
+                      // Customize the label text style
+                          labelStyle: TextStyle(
+                          color: Colors.black, // Label text color
+                          ),
                         ),
-                      ),
                     ),
+                    ),
+                    SizedBox(height: 30.0),
                     ElevatedButton(
                       onPressed: () async
                       {
@@ -237,38 +280,98 @@ class _MainScreenState extends State<MainScreen> {
                       child: Text('Your Ingredients',
                           style: TextStyle(fontSize: 18, color: Colors.black)),
                     ),*/
-
+                    SizedBox(height: 30.0),
                     Expanded(
                       child: ListView.builder(
-                        itemCount: userTasks.length,
+                        itemCount: originalUserTasks.length,
                         itemBuilder: (context, index) {
-                          print("Length of originalUserTasks: ${originalUserTasks.length}");
                           final task= originalUserTasks[index];
+                          if(task['DueDate'] != null) originalDate = DateFormat('yyyy-MM-ddTHH:mm:ss.SSSZ').parse('${task['DueDate']}');
+                          if(task['DueDate'] != null) formattedDate = DateFormat('MM-dd-yyyy').format(originalDate);
                           // Check if the task matches the search query (only if searchText is not empty)
-                          if (searchText.isEmpty || task['Desc'].toLowerCase().contains(searchText.toLowerCase())) {
+                          if (searchText.isEmpty || task['Desc'].toLowerCase().contains(searchText.toLowerCase()) || formattedDate.contains(searchText) || task['Ingredient'].toLowerCase().contains(searchText.toLowerCase()) ) {
                             return Container(
                               decoration: BoxDecoration(
-                                  color: Colors.lightBlue.withOpacity(0.7),
-                                  borderRadius: BorderRadius.circular(10.0)
+                                  color: Colors.white.withOpacity(0.9),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.15),
+                                    spreadRadius: 2,
+                                    blurRadius: 2,
+                                    offset: Offset(0, 5), // changes position of shadow
+                                  ),
+                                ]
                               ),
                               margin: EdgeInsets.all(8.0),
                               child: ListTile(
                                 title: Text(task['Desc']),
-                                subtitle: Text('${task['Ingredient']}'),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('${task['Ingredient']}'),
+                                    if(task['DueDate'] != null) Text('Date: $formattedDate'),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.star),
+                                        Text('${task['EffortPoints']}'),
+                                    ]
+                                    )
+
+                                  ],
+                                ),
                                 onTap: () {
                                   _showEditTaskDialog(
                                       username, task['_id'], task['Desc'],
-                                      task['Ingredient']);
+                                      task['Ingredient'], task['DueDate'],);
                                   setState(() {});
                                 },
-                                trailing: IconButton(
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children:[
+                                    IconButton(
+                                      icon: Icon(Icons.check),
+                                      color: Colors.green,
+                                      onPressed: () {
+                                        // Call the deleteTask function when the delete button is pressed
+                                        onFinishTaskPressed(username, task['_id']);
+                                      },
+                                    ),
+                                IconButton(
                                   icon: Icon(Icons.delete),
+                                  color: Colors.red,
                                   onPressed: () {
                                     // Call the deleteTask function when the delete button is pressed
-                                    onDeleteTaskPressed(username, task['_id']);
-                                  },
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context){
+                                          return AlertDialog(
+                                            title: Text('Delete task'),
+                                            content: Text('Are you sure you want to delete this task?'),
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('Cancel'),
+                                              ),
+                                              TextButton(
+                                                  onPressed: (){
+                                                    onDeleteTaskPressed(username, task['_id']);
+
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('Delete'),
+                                              ),
+                                ],
+                              );
+                  },
+                              );
+    },
                                 ),
-                              ),
+                              ],
+                            ),
+                          ),
                             );
                           } else{
                             return Container();
@@ -311,12 +414,30 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  Future<void> onFinishTaskPressed(String username, String taskId) async {
+    try {
+      // Make the API call to delete the task
+      await finishTask(username, taskId);
+
+      // Fetch the updated user tasks
+      await fetchUserTasks();
+
+      // Trigger a rebuild of the widget tree
+      setState(() {});
+    } catch (error) {
+      print("Error deleting task: $error");
+      // Handle the error as needed
+    }
+  }
+
 
   // Function to show a dialog for adding a new task
   Future<void> _showAddTaskDialog() async {
     TextEditingController titleController = TextEditingController();
     TextEditingController descriptionController = TextEditingController();
     TextEditingController ingredientController = TextEditingController();
+    TextEditingController dueDateController = TextEditingController();
+    TextEditingController effortPointsController = TextEditingController();
 
     return showDialog<void>(
       context: context,
@@ -334,9 +455,23 @@ class _MainScreenState extends State<MainScreen> {
               ),
               TextField(
                 controller: ingredientController,
-                decoration: InputDecoration(labelText: 'Details/Ingredients'),
+                decoration: InputDecoration(labelText: 'Ingredients'),
                 onChanged: (text) {
                   ingredient = text;
+                },
+              ),
+              TextField(
+                controller: dueDateController,
+                decoration: InputDecoration(labelText: 'Due Date (MM-DD-YYYY)'),
+                onChanged: (text) {
+                  dueDate = text;
+                },
+              ),
+              TextField(
+                controller: effortPointsController,
+                decoration: InputDecoration(labelText: 'Effort Points'),
+                onChanged: (text) {
+                  effortPoints = text;
                 },
               ),
             ],
@@ -351,17 +486,23 @@ class _MainScreenState extends State<MainScreen> {
             TextButton(
               child: Text('Add Task'),
               onPressed: ()   async  {
+                print("pressed");
                 // Validate and add the new task
                 if (descriptionController.text.isNotEmpty) {
                   Task newTask = Task(
                     descriptionController.text,
                     ingredientController.text,
+                    dueDateController.text,
                   );
-
                   newMessageText = "";
                   changeText();
+
+                  if(dueDate != null) originalDate = DateFormat('MM-dd-yyyy').parse(dueDate);
+                  formattedDate = DateFormat('yyyy-MM-ddTHH:mm:ss.SSSZ+00:00').format(originalDate);
+                  
+
                   String payload = '{"username":"${username.trim()}","desc":"${desc.trim()}","ingredient":"'
-                      '${ingredient.trim()}"}';
+                      '${ingredient.trim()}","dueDate":"$formattedDate","effortPoints":"${effortPoints.trim()}"}';
 
                   try {
                     String url = 'http://cop4331group2.com:5000/api/createTask';
@@ -391,9 +532,10 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Future<void> _showEditTaskDialog(String username, String taskId, String currentDesc, String currentIngredient) async {
+  Future<void> _showEditTaskDialog(String username, String taskId, String currentDesc, String currentIngredient, String? currentDueDate) async {
     TextEditingController descriptionController = TextEditingController(text: currentDesc);
     TextEditingController ingredientController = TextEditingController(text: currentIngredient);
+    TextEditingController dueDateController = TextEditingController(text: currentDueDate);
 
     await showDialog<void>(
       context: context,
@@ -408,7 +550,11 @@ class _MainScreenState extends State<MainScreen> {
               ),
               TextField(
                 controller: ingredientController,
-                decoration: InputDecoration(labelText: 'Details/Ingredients'),
+                decoration: InputDecoration(labelText: 'Ingredients'),
+              ),
+              TextField(
+                controller: dueDateController,
+                decoration: InputDecoration(labelText: 'Due Date (MM-DD-YYYY)'),
               ),
             ],
           ),
@@ -422,7 +568,7 @@ class _MainScreenState extends State<MainScreen> {
             TextButton(
               child: Text('Save Changes'),
               onPressed: () async {
-                await editTask(taskId, descriptionController.text, ingredientController.text);
+                await editTask(taskId, descriptionController.text, ingredientController.text, dueDateController.text);
                 Navigator.of(context).pop();
                 setState(() {});
               },
@@ -440,7 +586,7 @@ class CustomPopupMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.more_vert, color: Colors.white),
+      icon: Icon(Icons.check_box, color: Colors.white),
       onPressed: () {
         showDialog(
           context: context,
@@ -488,6 +634,14 @@ class CustomMenuDialog extends StatelessWidget {
                 Navigator.pushNamed(context, '/about');
               },
             ),
+
+            ListTile(
+              title: Text('View Recipes'),
+              onTap: () {
+                // Handle item 2 click
+                Navigator.pushNamed(context, '/recipe');
+              },
+            ),
             // Add more list items as needed
           ],
         ),
@@ -499,8 +653,9 @@ class CustomMenuDialog extends StatelessWidget {
 class Task{
   final String description;
   final String ingredient;
+  final String dueDate;
 
-  Task(this.description, this.ingredient);
+  Task(this.description, this.ingredient, this.dueDate);
 }
 
 
