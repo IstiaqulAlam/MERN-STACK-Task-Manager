@@ -265,7 +265,7 @@ router.put('/updateLastLoggedIn', async (req, res, next) => {
 
 
 //endpoint for creating a task
-router.post('/createTask', authenticateToken, async (req, res, next) => {
+router.post('/createTask', async (req, res, next) => {
   const client = await MongoClient.connect(process.env.DB);
   const database = client.db('COP4331');
   const usersCollection = database.collection('Users');
