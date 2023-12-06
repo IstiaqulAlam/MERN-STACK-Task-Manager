@@ -16,7 +16,7 @@ function SetNewPassword() {
 
     console.log(email);
 
-    const urlBase = 'http://localhost:5000';
+    const urlBase = 'http://cop4331group2.com:5000';
 
     const password = document.getElementById("newPassword").value;
 
