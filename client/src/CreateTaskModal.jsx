@@ -53,6 +53,7 @@ if (!taskName || pickedIngredient === 'Pick an Ingredient' || !dueDate || !effor
 
         setLoading(true);
         try {
+            console.log("Username is :" + username);
             console.log('Sending POST request...');
             const response = await fetch(`${urlBase}/api/createTask`, {
                 method: 'POST',

@@ -52,7 +52,7 @@ function MainPage() {
 
     const isAscending = sortOrder.field === field ? !sortOrder.ascending : true;
     const sortedTasks = [...tasks].sort((a, b) =>
-      isAscending ? a[field] > b[field] : a[field] < b[field]
+      isAscending ? (a[field] > b[field] ? -1 : 1) : (a[field] < b[field] ? -1 : 1)
     );
 
     setSortOrder({

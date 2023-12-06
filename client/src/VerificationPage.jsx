@@ -29,7 +29,6 @@ function VerificationPage() {
       <div className="container">
         <div className="verify-box">
           <div className="form-title">Verification</div>
-          <div className="form-title">Verification</div>
           <form
             className="verification-form"
             onKeyDown={handleKeyDown} 
