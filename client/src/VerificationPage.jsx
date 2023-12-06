@@ -34,7 +34,7 @@ function VerificationPage() {
             onKeyDown={handleKeyDown} 
           >
             <label className="h5" htmlFor="verificationCode">Verification Code:</label>
-            <input className="rounded-pill p-2 mb-4" id="verificationCode" type="text" placeholder="Verifican Code:" required />
+            <input className="rounded-pill p-2 mb-4" id="verificationCode" type="text" placeholder="Verification Code:" required />
             <button type="button" onClick={handleVerification} id="verifyButton">Verify</button>
             <p>{verificationNotice}</p>
           </form>
