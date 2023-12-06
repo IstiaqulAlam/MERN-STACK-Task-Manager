@@ -52,7 +52,7 @@ function MainPage() {
 
     const isAscending = sortOrder.field === field ? !sortOrder.ascending : true;
     const sortedTasks = [...tasks].sort((a, b) =>
-      isAscending ? a[field] > b[field] : a[field] < b[field]
+      isAscending ? (a[field] > b[field] ? -1 : 1) : (a[field] < b[field] ? -1 : 1)
     );
 
     setSortOrder({
@@ -242,7 +242,10 @@ function MainPage() {
       console.error('Error fetching tasks:', error.message);
     }
   };
-
+  const handleSearchFormSubmit = (e) => {
+    e.preventDefault();
+    handleSearchByName();
+  };
 
   const handleSearchByDueDate = async () => {
     if (searchDueDate.trim() === '') {
@@ -266,7 +269,7 @@ function MainPage() {
       <div className="container">
         <div className="main-page-box">
 
-        <div className="welcome-user-container">
+          <div className="welcome-user-container">
             <div className="form-title2 welcome-user">Welcome, {user}</div>
             <button
               type="button"
@@ -276,15 +279,15 @@ function MainPage() {
               View Profile
             </button>
             {showProfileModal && (
-              <ProfileModal 
-              setShowProfileModal={setShowProfileModal} 
+              <ProfileModal
+                setShowProfileModal={setShowProfileModal}
               />
             )}
             {showProfileModal ? <div id="overlay" onClick={() => setShowProfileModal(false)}></div> : undefined}
 
           </div>
           <div className="task-list-container">
-            <form id="mainForm">
+            <form id="mainForm" onSubmit={handleSearchFormSubmit}>
               <button
                 type="button"
                 className="button_mainpage"
