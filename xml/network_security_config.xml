@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Add specific configurations for domains if needed -->
+        <domain includeSubdomains="true">cop4331group2.com</domain>
+    </domain-config>
+</network-security-config>
