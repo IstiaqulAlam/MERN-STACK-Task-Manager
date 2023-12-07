@@ -10,7 +10,7 @@ function RegisterMERT() {
   const handleRegister = async () => {
     const registrationResult = await Register();
 
-    if (registrationResult === "Registration successful") {
+    if (registrationResult === "Registration successful.") {
       navigate('/verify');
     } else {
       setRegisterNotice(registrationResult);
